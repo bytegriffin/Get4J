@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.bytegriffin</groupId>
+		<artifactId>get4j-parent</artifactId>
+		<version>1.0.1</version>
+		<relativePath>../pom.xml</relativePath> 
+	</parent>
+	<artifactId>get4j-cluster</artifactId>
+	<name>get4j-cluster</name>
+	<url>https://github.com/bytegriffin/Get4J</url>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.github.bytegriffin</groupId>
+			<artifactId>get4j-core</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-recipes</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-client</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- 发布项目 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.bytegriffin.get4j.Spider</mainClass>
+						</manifest>
+					</archive>
+					<descriptors>
+						<descriptor>assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- 打全量包 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.bytegriffin.get4j.Cluster</mainClass>
+								</transformer>
+							</transformers>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>all-in-one</shadedClassifierName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- 打依赖包 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>target/lib/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+
+		<!-- 打源码包时需要添加的配置文件 -->
+		<resources>
+			<resource>
+				<directory>${project.basedir}/conf/</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/user_agent</include>
+					<include>**/http_proxy</include>
+					<include>**/log4j2.xml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+</project>

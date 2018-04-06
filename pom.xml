@@ -1,0 +1,490 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.bytegriffin</groupId>
+	<artifactId>get4j-parent</artifactId>
+	<version>1.0.1</version>
+	<packaging>pom</packaging>
+	<name>get4j-parent</name>
+	<url>https://github.com/bytegriffin/Get4J</url>
+
+	<parent>
+	    <groupId>org.sonatype.oss</groupId>
+	    <artifactId>oss-parent</artifactId>
+	    <version>9</version>
+	</parent>
+	
+	<developers>
+		<developer>
+			<id>bytegriffin</id>
+			<name>Qiang Gan</name>
+			<email>bytegriffin@126.com</email>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:https://github.com/bytegriffin/Get4J.git</connection>
+		<developerConnection>scm:git:https://github.com/bytegriffin/Get4J.git</developerConnection>
+		<url>git@github.com:bytegriffin/Get4J.git</url>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/bytegriffin/Get4J/issues</url>
+	</issueManagement>
+
+	<modules>
+		<module>get4j-core</module>
+		<module>get4j-cluster</module>
+		<module>get4j-sample</module>
+	</modules>
+
+	<properties>
+		<log4j.version>2.11.0</log4j.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<dom4j.version>2.1.0</dom4j.version>
+		<httpcore.version>4.4.9</httpcore.version>
+		<httpclient.version>4.5.5</httpclient.version>
+		<jsoup.version>1.11.2</jsoup.version>
+		<!-- 注意：selenium最新版本修改了API且不支持phantomjs -->
+		<selenium.version>3.11.0</selenium.version>
+		<fastjson.version>1.2.47</fastjson.version>
+		<jsonpath.version>2.4.0</jsonpath.version>
+		<!-- 注意：以下是java8的，和java6、java7不一样 -->
+		<hikaricp.version>2.7.8</hikaricp.version>
+		<mysql-connector.version>6.0.6</mysql-connector.version>
+		<mongo.version>3.6.3</mongo.version>
+		<commons-net.version>3.6</commons-net.version>
+		<snakeyaml.version>1.20</snakeyaml.version>
+		<!-- 注意：lucene版本需要java8 -->
+		<lucene.version>7.3.0</lucene.version>
+		<protostuff.version>1.6.0</protostuff.version>
+		<javaxmail.version>1.6.1</javaxmail.version>
+		<!-- 注意：guava版本23.0是需要java8 -->
+		<guava.version>23.0</guava.version>
+		<jedis.version>2.9.0</jedis.version>
+		<zookeeper.version>3.4.11</zookeeper.version>
+		<curator.version>4.0.1</curator.version>
+		<hbase.version>1.4.2</hbase.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-nop</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>${dom4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>${httpcore.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jsoup</groupId>
+				<artifactId>jsoup</artifactId>
+				<version>${jsoup.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-java</artifactId>
+				<exclusions>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-chrome-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-edge-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-ie-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-firefox-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-opera-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-safari-driver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>javax.servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
+				<version>${selenium.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-chrome-driver</artifactId>
+				<version>${selenium.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path</artifactId>
+				<version>${jsonpath.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.zaxxer</groupId>
+				<artifactId>HikariCP</artifactId>
+				<version>${hikaricp.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongo-java-driver</artifactId>
+				<version>${mongo.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>${commons-net.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snakeyaml.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-core</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-common</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-smartcn</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.protostuff</groupId>
+				<artifactId>protostuff-core</artifactId>
+				<version>${protostuff.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.protostuff</groupId>
+				<artifactId>protostuff-runtime</artifactId>
+				<version>${protostuff.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javaxmail.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>${jedis.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.zookeeper</groupId>
+				<artifactId>zookeeper</artifactId>
+				<version>${zookeeper.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>slf4j-log4j12</artifactId>
+						<groupId>org.slf4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-client</artifactId>
+				<version>${curator.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-recipes</artifactId>
+				<version>${curator.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-framework</artifactId>
+				<version>${curator.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.hbase</groupId>
+				<artifactId>hbase-client</artifactId>
+				<version>${hbase.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.hadoop</groupId>
+						<artifactId>hadoop-mapreduce-client-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jruby.jcodings</groupId>
+						<artifactId>jcodings</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.jruby.joni</groupId>
+						<artifactId>joni</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.hbase</groupId>
+						<artifactId>hbase-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-configuration</groupId>
+						<artifactId>commons-configuration</artifactId>
+					</exclusion>
+					<exclusion>
+						<artifactId>junit</artifactId>
+						<groupId>junit</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.7.0</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.4</version>
+					<configuration>
+						<aggregate>true</aggregate>
+					</configuration>
+					<executions>
+						<execution>
+							<id>aggregate</id>
+							<goals>
+								<goal>aggregate</goal>
+							</goals>
+							<phase>site</phase>
+						</execution>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<!-- Source -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Javadoc -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.4</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- GPG -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.8</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+						<version>2.5.3</version>
+						<configuration>
+							<autoVersionSubmodules>true</autoVersionSubmodules>
+							<useReleaseProfile>false</useReleaseProfile>
+							<releaseProfiles>release</releaseProfiles>
+							<goals>deploy</goals>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+	</profiles>
+
+
+</project>

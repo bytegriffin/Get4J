@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 爬虫集群配置 -->
+<node>
+
+	<property>
+		<name>node.name</name>
+		<value>cluster1</value>
+		<description>
+			必填项。集群节点名称要保证唯一。
+		</description>
+	</property>
+	
+	<property>
+		<name>fetch.redis.mode</name>
+		<value></value>
+		<description>
+			必填项。redis部署模式：standalone（单机）,sharded（分片）,cluster（集群）
+		</description>
+	</property>
+
+	<property>
+		<name>fetch.redis.address</name>
+		<value></value>
+		<description>
+			必填项。可以一个或者多个地址，格式：host1:port1,host2:port2
+		</description>
+	</property>
+
+	<property>
+		<name>fetch.redis.auth</name>
+		<value></value>
+		<description>
+			非必填项。redis密码认证。
+		</description>
+	</property>
+
+	<property>
+		<name>ha.zookeeper.quorum</name>
+		<value></value>
+		<description>
+			必填项。格式：host1:port1,host2:port2
+		</description>
+	</property>
+
+</node>

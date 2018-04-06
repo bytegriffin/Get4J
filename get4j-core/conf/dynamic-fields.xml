@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 爬取的种子动态字段集合 -->
+<seeds>
+	<seed>
+		<name>seed123</name>
+		<description>必填项。此名称必须要与core-seed.xml中的seed名称保持一致，才能对应得上。</description>
+		<fields>
+			<field>
+				<name>abc</name>
+				<selector>div.archiveDisclaimerMessage</selector>
+				<description>name和selector都是必填项，replace是非必填项。name为自定义字段名称，selector表示页面选择器，支持Jsoup原生css选择器，jsonpath。</description>
+			</field>
+			<field>
+				<name>ccc</name>
+				<selector></selector>
+			</field>
+		</fields>
+	</seed>
+</seeds>
