@@ -58,7 +58,7 @@
 		<fastjson.version>1.2.47</fastjson.version>
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<!-- 注意：以下是java8的，和java6、java7不一样 -->
-		<hikaricp.version>2.7.8</hikaricp.version>
+		<hikaricp.version>3.0.0</hikaricp.version>
 		<mysql-connector.version>6.0.6</mysql-connector.version>
 		<mongo.version>3.6.3</mongo.version>
 		<commons-net.version>3.6</commons-net.version>
