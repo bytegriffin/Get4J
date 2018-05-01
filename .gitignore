@@ -1,14 +1,11 @@
 /target/
 .settings/
-.classpath
+.mvn/
 .metadata  
-.project
 .myeclipse
 .pydevproject
-*.iml
 /out/
-.idea
-*.jar  
+*.jar
 *.war  
 *.ear  
 *.class  
@@ -19,3 +16,25 @@ classes/
 *.tmp  
 *.bak  
 *.swp 
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
