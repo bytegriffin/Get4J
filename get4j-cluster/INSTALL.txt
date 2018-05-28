@@ -18,7 +18,7 @@
     Unix based systems (Linux, Solaris and Mac OS X) 或者其他:
        Linux, Solaris, Mac OS X, Ubuntu CentOS 等等.
 
-  安装
+  1.普通安装
   ----------------
   1) 请确保本机已经安装Git，Maven，并且配置好了JDK1.8。
 
@@ -45,9 +45,21 @@
 
   10) 如果需要数据库(MySQL/MongoDB等)存放爬虫数据，那么需要按照get4j-cluster-x.y.z-release/conf/schema.sql中导入数据表结构。
   
-  
+  2.Docker安装
+  ----------------
+  1) 下载最新版
+	 docker pull bytegriffin/get4j-cluster
+  2) 配置get4j-cluster/conf/core-seeds.xml、get4j-cluster/conf/cluster-node.xml文件
+  	 docker run -it IMAGE_ID /bin/bash
+  	 vi get4j-cluster/core-seeds.xml
+  	 vi get4j-cluster/cluster-note.xml
+  3) 如果需要mysql或者mongodb
+	 docker pull mysql
+	 docker pull mongodb 
+     将get4j-cluster/conf/schema.sql文件导入相应的数据库
+  4) 运行./get4j-cluster/bin/spider start
+
   协议
   ---------
-
-  请参看同目录下的LICENSE文件.
+  Apache License Version 2
 

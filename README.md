@@ -14,8 +14,36 @@
 * 支持将抓取的内容保存到不同的引擎中：Disk、Mysql、MongoDB、Lucene、HBase等
 * 支持JMX监控，实时检查各个爬虫节点/进程的健康状况，一旦发现问题会自动发Email通知管理员
 
-# 安装
-请查看get4j-core/INSTALL.txt或get4j-cluster/INSTALL.txt文件
+# Docker安装
+单机版:
+
+```xml
+1) 下载最新版
+   docker pull bytegriffin/get4j-core
+2) 配置get4j-core/conf/core-seeds.xml文件
+   docker run -it IMAGE_ID /bin/bash
+   vi get4j-core/core-seeds.xml
+3) 如果需要mysql或者mongodb
+   docker pull mysql
+   docker pull mongodb 
+   将get4j-core/conf/schema.sql文件导入相应的数据库
+4) 运行./get4j-core/bin/spider start
+```
+集群版:
+
+```xml
+1) 下载最新版
+   docker pull bytegriffin/get4j-cluster
+2) 配置get4j-cluster/conf/core-seeds.xml、get4j-cluster/conf/cluster-node.xml文件
+   docker run -it IMAGE_ID /bin/bash
+   vi get4j-cluster/core-seeds.xml
+   vi get4j-cluster/cluster-note.xml
+3) 如果需要mysql或者mongodb
+   docker pull mysql
+   docker pull mongodb 
+   将get4j-cluster/conf/schema.sql文件导入相应的数据库
+4) 运行./get4j-cluster/bin/spider start
+```
 
 ## Maven Repository
 单机版:
