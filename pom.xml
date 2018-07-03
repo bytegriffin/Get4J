@@ -49,30 +49,26 @@
 	<properties>
 		<log4j.version>2.11.0</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<dom4j.version>2.1.0</dom4j.version>
-		<httpcore.version>4.4.9</httpcore.version>
+		<dom4j.version>2.1.1</dom4j.version>
+		<httpcore.version>4.4.10</httpcore.version>
 		<httpclient.version>4.5.5</httpclient.version>
-		<jsoup.version>1.11.2</jsoup.version>
-		<!-- 注意：selenium最新版本修改了API且不支持phantomjs -->
-		<selenium.version>3.11.0</selenium.version>
+		<jsoup.version>1.11.3</jsoup.version>
+		<selenium.version>3.13.0</selenium.version>
 		<fastjson.version>1.2.47</fastjson.version>
 		<jsonpath.version>2.4.0</jsonpath.version>
-		<!-- 注意：以下是java8的，和java6、java7不一样 -->
-		<hikaricp.version>3.0.0</hikaricp.version>
-		<mysql-connector.version>6.0.6</mysql-connector.version>
-		<mongo.version>3.6.3</mongo.version>
+		<hikaricp.version>3.2.0</hikaricp.version>
+		<mysql-connector.version>8.0.11</mysql-connector.version>
+		<mongo.version>3.8.0</mongo.version>
 		<commons-net.version>3.6</commons-net.version>
-		<snakeyaml.version>1.20</snakeyaml.version>
-		<!-- 注意：lucene版本需要java8 -->
-		<lucene.version>7.3.0</lucene.version>
+		<snakeyaml.version>1.21</snakeyaml.version>
+		<lucene.version>7.4.0</lucene.version>
 		<protostuff.version>1.6.0</protostuff.version>
 		<javaxmail.version>1.6.1</javaxmail.version>
-		<!-- 注意：guava版本23.0是需要java8 -->
-		<guava.version>23.0</guava.version>
+		<guava.version>25.1-jre</guava.version>
 		<jedis.version>2.9.0</jedis.version>
-		<zookeeper.version>3.4.11</zookeeper.version>
+		<zookeeper.version>3.4.12</zookeeper.version>
 		<curator.version>4.0.1</curator.version>
-		<hbase.version>1.4.3</hbase.version>
+		<hbase.version>2.0.1</hbase.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>

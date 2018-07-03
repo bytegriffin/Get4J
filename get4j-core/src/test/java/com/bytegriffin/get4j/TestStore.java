@@ -73,7 +73,7 @@ public class TestStore {
         }
 
         collection.updateOne(searchQuery, new Document().append("fetch_url", "aaaa"));
-        System.out.println(collection.count());
+        System.out.println(collection.countDocuments());
     }
 
     public static void main(String[] args) throws Exception {

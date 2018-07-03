@@ -1,21 +1,25 @@
 package com.bytegriffin.get4j.store;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.curator.shaded.com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hbase.thirdparty.com.google.common.collect.Lists;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,12 +68,14 @@ public class HBaseStorage implements Process {
 				admin.createNamespace(NamespaceDescriptor.create(namespace).build());
 			}
 			if (!admin.tableExists(tName)) {	
-				HTableDescriptor tableDescriptor = new HTableDescriptor(tName);
-				tableDescriptor.setDurability(Durability.ASYNC_WAL);//异步写入
-				tableDescriptor.addFamily(new HColumnDescriptor(columnFamily));
-				admin.createTable(tableDescriptor);
+				TableDescriptorBuilder builder = TableDescriptorBuilder.newBuilder(tName);
+				List<ColumnFamilyDescriptor> cfList = Lists.newArrayList();
+				cfList.add(ColumnFamilyDescriptorBuilder.newBuilder(Bytes.toBytes(columnFamily)).build());
+				builder.setColumnFamilies(cfList).setReadOnly(false);
+				TableDescriptor desc = builder.setDurability(Durability.ASYNC_WAL).build();
+				admin.createTable(desc);
 			}
-			Table table = connection.getTable(TableName.valueOf(tableName));
+			Table table = connection.getTable(tName);
 			tables.put(seed.getSeedName(), table);
 			admin.close();
 		} catch (Exception e) {
