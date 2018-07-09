@@ -130,10 +130,6 @@
 				<exclusions>
 					<exclusion>
 						<groupId>org.seleniumhq.selenium</groupId>
-						<artifactId>selenium-chrome-driver</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.seleniumhq.selenium</groupId>
 						<artifactId>selenium-edge-driver</artifactId>
 					</exclusion>
 					<exclusion>
@@ -169,6 +165,12 @@
 				<artifactId>selenium-chrome-driver</artifactId>
 				<version>${selenium.version}</version>
 			</dependency>
+			
+			<dependency>
+	            <groupId>org.seleniumhq.selenium</groupId>
+	            <artifactId>selenium-remote-driver</artifactId>
+	            <version>${selenium.version}</version>
+	        </dependency>
 
 			<dependency>
 				<groupId>com.alibaba</groupId>
@@ -369,7 +371,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.0</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -382,7 +384,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
+					<version>3.0.1</version>
 					<configuration>
 						<aggregate>true</aggregate>
 					</configuration>
@@ -430,7 +432,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<phase>package</phase>

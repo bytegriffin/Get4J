@@ -199,9 +199,10 @@ public final class SpiderEngine {
 			for (HttpProxy httpProxy : hplist) {
 				String furl = UrlAnalyzer.formatListDetailUrl(seed.getFetchUrl());
 				boolean isReached = http.testHttpProxy(furl, httpProxy);
-				if (!isReached) {
-					logger.warn("Http代理[{}]测试失效。", httpProxy.toString());
+				if (isReached) {
 					newList.add(httpProxy);
+				} else {
+					logger.warn("Http代理[{}]测试失效。", httpProxy.toString());
 				}
 			}
 			if (newList.size() == 0) {
