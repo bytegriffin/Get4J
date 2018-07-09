@@ -41,7 +41,8 @@ public class TestHttpEngine {
 	 */
 	public static void parse(String cotent) {
 		Document doc = Jsoup.parse(cotent);
-		Elements eles = doc.select("div.inv-title.pt5>a[href]");
+		Elements eles = doc.select("div._5pcb");
+		System.err.println(eles.html());
 		for (Element e : eles) {
 			String link = e.attr("href");
 			System.err.println(link);
@@ -81,12 +82,12 @@ public class TestHttpEngine {
 	}
 
 	public static void selenium() throws Exception {
-		System.setProperty("webdriver.chrome.driver",  "/opt/chromedriver");
+		System.setProperty("webdriver.chrome.driver",  "/opt/workspace/Get4J/get4j-sample/bin/chromedriver");
 		
 		ChromeDriverService service = new ChromeDriverService.Builder()
 				.withSilent(true)
 				.withLogFile(Paths.get(DefaultConfig.chromedriver_log).toFile())
-                .usingDriverExecutable(new File("/opt/chromedriver"))
+                .usingDriverExecutable(new File("/opt/workspace/Get4J/get4j-sample/bin/chromedriver"))
                 .usingAnyFreePort()
                 .build();
 		// Proxy proxy = new Proxy();
@@ -99,14 +100,14 @@ public class TestHttpEngine {
     	chromeOptions.addArguments("--test-type", "--ignore-certificate-errors");
     	//chromeOptions.addArguments("user-data-dir=C:/Users/user_name/AppData/Local/Google/Chrome/User Data");
     	chromeOptions.setCapability(CapabilityType.BROWSER_NAME, "Google Chrome");
-    	chromeOptions.setCapability("noSign", true);
-    	chromeOptions.setCapability("unicodeKeyboard", true);
-    	chromeOptions.setCapability("newCommandTimeout", "30");
+    	//chromeOptions.setCapability("noSign", true);
+    	//chromeOptions.setCapability("unicodeKeyboard", true);
+    	chromeOptions.setCapability("newCommandTimeout", "60");
     	
     	WebDriver driver = new ChromeDriver(service, chromeOptions);
     	
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		driver.get("http://www.weibo.com/");	
+		driver.manage().timeouts().implicitlyWait(50, TimeUnit.SECONDS);
+		driver.get("https://www.facebook.com/groups/CardanoCommunity");	
 		//显示等待控制对象
 //	    WebDriverWait webDriverWait=new WebDriverWait(driver,10);
 //	    //等待输入框可用后输入账号密码
@@ -122,6 +123,9 @@ public class TestHttpEngine {
 //	    while (iterator.hasNext()){
 //	        System.out.println(iterator.next().toString());
 //	    }
+		
+
+		
 		String content = driver.getPageSource();
 		parse(content);
 		System.out.println("======================: " +content);
