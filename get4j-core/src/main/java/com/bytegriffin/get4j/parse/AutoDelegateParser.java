@@ -21,16 +21,18 @@ public class AutoDelegateParser implements Process {
     public void init(Seed seed) {
         PageParser pp = null;
         String clazz = seed.getParseClassImpl();
-        if (!Strings.isNullOrEmpty(seed.getParseElementSelector())) {// new内置ElementSelectPageParser
-            pp = new ElementPageParser(seed.getParseElementSelector());
-        } else { // 自定义
+        if (!Strings.isNullOrEmpty(seed.getParseClassImpl())){ // 自定义
             try {
                 pp = (PageParser) Class.forName(clazz).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 logger.error("种子[" + seed.getSeedName() + "]初始化页面解析类[" + clazz + "]时出现问题，", e);
                 System.exit(1);
             }
-        }
+        } else if (seed.getPageParser() != null) { //lambda 定义
+        	pp = seed.getPageParser();
+        } else if (!Strings.isNullOrEmpty(seed.getParseElementSelector())) {// new内置ElementSelectPageParser
+            pp = new ElementPageParser(seed.getParseElementSelector());
+        } 
         Globals.PAGE_PARSER_CACHE.put(seed.getSeedName(), pp);
         logger.info("种子[" + seed.getSeedName() + "]的组件DelegateParser的初始化完成。");
     }

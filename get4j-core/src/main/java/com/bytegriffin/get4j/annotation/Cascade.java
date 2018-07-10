@@ -35,13 +35,11 @@ public @interface Cascade {
 
     String resourceSelector() default "";
 
-    String downloadDisk() default "default";
+    String downloadDisk() default "";
 
     String downloadHdfs() default "";
 
     boolean javascriptSupport() default false;
-
-    String parser() default "";
 
     String jdbc() default "";
 

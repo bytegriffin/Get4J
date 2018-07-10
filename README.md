@@ -76,14 +76,27 @@ import com.bytegriffin.get4j.parse.PageParser;
 public class GithubPageParser implements PageParser {
     @Override
     public void parse(Page page) {
-    	String content = page.jsoupText("div.readme");
-    	System.err.println("页面title：["+page.getTitle() + "] Get4J页面上的简介: " + content );
+    	 String content = page.jsoupText("div.readme");
+    	 System.err.println("Get4J内容: " + content );
     }
 
     public static void main(String[] args) throws Exception {
-	Spider.single().fetchUrl("https://github.com/bytegriffin/Get4J")
-	    .parser(GithubPageParser.class).thread(1).start();
+	   Spider.single().fetchUrl("https://github.com/bytegriffin/Get4J")
+	        .parser(GithubPageParser.class).thread(1).start();
     }
+}
+```
+或者使用JDK8以上更为简洁的Lambda表达式：
+
+```java
+import com.bytegriffin.get4j.Spider;
+
+public class GithubPageParser {
+	public static void main(String[] args) throws Exception {
+		Spider.single().fetchUrl("https://github.com/bytegriffin/Get4J")
+			.parser(page -> {System.err.println("Get4J内容: " + page.jsoupText("div.readme"));})
+			.thread(1).start();
+	}
 }
 ```
 

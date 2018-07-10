@@ -9,7 +9,7 @@ public class CustomPageParser implements PageParser {
 
     @Override
     public void parse(Page page) {
-
+    	
     }
 
     public static void main(String[] args) throws Exception {

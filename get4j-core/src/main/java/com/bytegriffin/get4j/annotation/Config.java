@@ -15,5 +15,4 @@ public @interface Config {
 	
 	String downloadFilenameRule() default "default";
 	
-	
 }

@@ -196,7 +196,7 @@ public final class SpiderEngine {
 		List<HttpProxy> hplist = seed.getFetchHttpProxy();
 		if (hplist != null && hplist.size() > 0) {
 			LinkedList<HttpProxy> newList = Lists.newLinkedList();
-			for (HttpProxy httpProxy : hplist) {
+			hplist.forEach(httpProxy -> {
 				String furl = UrlAnalyzer.formatListDetailUrl(seed.getFetchUrl());
 				boolean isReached = http.testHttpProxy(furl, httpProxy);
 				if (isReached) {
@@ -204,7 +204,7 @@ public final class SpiderEngine {
 				} else {
 					logger.warn("Http代理[{}]测试失效。", httpProxy.toString());
 				}
-			}
+			});
 			if (newList.size() == 0) {
 				logger.error("启动失败：种子[{}]测试Http代理全部失效，请重新配置。", seed.getSeedName());
 				System.exit(1);
@@ -220,12 +220,10 @@ public final class SpiderEngine {
 		if (dynamicFields == null || dynamicFields.size() == 0) {
 			return;
 		}
-		for (DynamicField p : dynamicFields) {
-			if (Strings.isNullOrEmpty(p.getSeedName()) || p.getFields() == null || p.getFields().isEmpty()) {
-				continue;
-			}
-			Globals.DYNAMIC_FIELDS_CACHE.put(p.getSeedName(), p.getFields());
-		}
+		dynamicFields.stream().filter(p -> !Strings.isNullOrEmpty(p.getSeedName()))
+			.filter(p -> p.getFields() != null)
+			.filter(p -> !p.getFields().isEmpty())
+			.forEach(p -> Globals.DYNAMIC_FIELDS_CACHE.put(p.getSeedName(), p.getFields()));
 	}
 
 	/**
@@ -309,6 +307,11 @@ public final class SpiderEngine {
 				chain.addProcess(dp);
 				dp.init(seed);
 				subProcess.append("-ElementSelectPageParser");
+			} else if (seed.getPageParser() != null) {
+				AutoDelegateParser dp = new AutoDelegateParser();
+				chain.addProcess(dp);
+				dp.init(seed);
+				subProcess.append("-LambdaPageParser");
 			}
 
 			// 不配置成else if是想系统支持多个数据源
@@ -479,7 +482,7 @@ public final class SpiderEngine {
 				timer.schedule(job, 0L);
 			}
 		} else {
-			if (Strings.isNullOrEmpty(starttime) && Strings.isNullOrEmpty(interval)) {
+			if (Strings.isNullOrEmpty(starttime) && (Strings.isNullOrEmpty(interval) || Integer.valueOf(interval) == 0 )) {
 				timer.schedule(job, 0L);
 			} else if (Strings.isNullOrEmpty(starttime) && !Strings.isNullOrEmpty(interval)) {
 				timer.schedule(job, DateUtil.strToDate(DateUtil.getCurrentDate()), Long.valueOf(interval) * 1000);

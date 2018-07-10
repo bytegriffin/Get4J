@@ -9,6 +9,7 @@ import com.bytegriffin.get4j.core.PageMode;
 import com.bytegriffin.get4j.fetch.FetchResourceSelector;
 import com.bytegriffin.get4j.net.http.HttpProxy;
 import com.bytegriffin.get4j.net.http.UrlAnalyzer;
+import com.bytegriffin.get4j.parse.PageParser;
 import com.bytegriffin.get4j.util.FileUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -128,6 +129,10 @@ public class Seed {
      * 内置解析实现类，目前只有一种内置类，支持：jsoup的css选择器、正则表达式（html内容）或jsonpath（json内容）
      */
     private String parseElementSelector;
+    /**
+     * 自定义lambda接口
+     */
+    private PageParser pageParser;
     /**
      * 连接jdbc保存到mysql
      * jdbc:mysql://localhost:3306/get4j?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8&amp;user=root&amp;password=root
@@ -370,7 +375,15 @@ public class Seed {
         this.parseClassImpl = parseClassImpl;
     }
 
-    public String getStoreJdbc() {
+    public PageParser getPageParser() {
+		return pageParser;
+	}
+
+	public void setPageParser(PageParser pageParser) {
+		this.pageParser = pageParser;
+	}
+
+	public String getStoreJdbc() {
         return storeJdbc;
     }
 

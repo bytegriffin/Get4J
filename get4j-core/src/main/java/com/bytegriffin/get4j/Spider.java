@@ -29,6 +29,7 @@ import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.core.PageMode;
 import com.bytegriffin.get4j.core.SpiderEngine;
 import com.bytegriffin.get4j.net.http.HttpProxy;
+import com.bytegriffin.get4j.parse.PageParser;
 import com.bytegriffin.get4j.util.FileUtil;
 import com.bytegriffin.get4j.util.MD5Util;
 import com.google.common.base.Strings;
@@ -56,6 +57,12 @@ public class Spider {
     private Map<String, String> dynamicFieldMap;
 
     private Spider() {
+    	DefaultConfig.closeHttpClientLog();
+    	dynamicFieldMap = Maps.newHashMap();
+    	seed = new Seed();
+        resourceSync = new ResourceSync();
+        configuration = new Configuration();
+        dynamicField = new DynamicField();
     }
 
     private Spider(PageMode pageMode) {
@@ -406,6 +413,16 @@ public class Spider {
     }
 
     /**
+     * 自定义页面解析接口，用于Lambda表达式
+     * @param parser
+     * @return
+     */
+    public Spider parser(PageParser parser) {
+    	seed.setPageParser(parser);
+        return this;
+    }
+
+    /**
      * 单个页面元素解析内部类，设置了此项就不能设置自定义的解析类了
      *
      * @param elementSelector Jsoup支持的选择器字符串
@@ -505,26 +522,6 @@ public class Spider {
     	}
     	configuration.setEmailRecipient(sb.toString());
     	return this;
-    }
-    
-    /**
-     * 通过反射的方式设置一个类的多个动态字段
-     * @param clazz 类
-     * @return Spider
-     */
-    public Spider field(Class<?> clazz){        
-        java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-        if(fields == null || fields.length == 0){
-        	logger.error("类[" + clazz.getName() + "]的属性并没有配置Field注解。");
-            System.exit(1);
-        }
-        for(java.lang.reflect.Field field : fields){
-        	String name = field.getName();
-        	Field column = field.getAnnotation(Field.class);
-            String selector = column.value();
-            field(name, selector);
-        }
-		return this;
     }
 
     /**
@@ -635,6 +632,24 @@ public class Spider {
     }
 
     /**
+     * 通过反射的方式设置一个类的多个动态字段
+     * @param clazz 类
+     * @return Spider
+     */
+    private void setDynamicField(Class<? extends PageParser> clazz){        
+        java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
+        if(fields == null || fields.length == 0){
+        	return;
+        }
+        for(java.lang.reflect.Field field : fields){
+        	String name = field.getName();
+        	Field column = field.getAnnotation(Field.class);
+            String selector = column.value();
+            this.field(name, selector);
+        }
+    }
+
+    /**
      * annotation入口，如果不想一项一项设置Api，也可以写一个annotation
      * annotation类：ListDetail（列表-详情页面）、Single（单个页面，不抓取页面上链接)、Cascade（单个页面，包括所有链接）、Site（单个站点）
      *
@@ -642,13 +657,9 @@ public class Spider {
      * @return Spider
      * @throws Exception 异常
      */
-    public static Spider annotation(Class<?> clazz) throws Exception {
+    public static Spider annotation(Class<? extends PageParser> clazz) throws Exception {
     	DefaultConfig.closeHttpClientLog();
         me = new Spider();
-        seed = new Seed();
-        resourceSync = new ResourceSync();
-        configuration = new Configuration();
-        dynamicField = new DynamicField();
         return me.getAnnotation(clazz);
     }
 
@@ -658,138 +669,129 @@ public class Spider {
      * @param clazz clazz
      * @return Spider
      */
-    private Spider getAnnotation(Class<?> clazz) {
+    private Spider getAnnotation(Class<? extends PageParser> clazz) {
         Annotation[] ans = clazz.getDeclaredAnnotations();
         if (ans == null || ans.length == 0) {
-            logger.error("类[" + clazz.getName() + "]没有配置任何Annotation。");
+            logger.error("类[{}]没有配置任何Annotation。",clazz.getName());
             System.exit(1);
         }
         for (Annotation an : ans) {
             String type = an.annotationType().getSimpleName();
-            if ("ListDetail".equalsIgnoreCase(type)) {
-                if (clazz.isAnnotationPresent(ListDetail.class)) {
-                    ListDetail seed = (ListDetail) clazz.getAnnotation(ListDetail.class);
-                    this.pageMode(PageMode.list_detail);
-                    this.fetchUrl(seed.url());
-                    this.method(seed.method());
-                    this.probe(seed.probeSelector(), seed.probeSleep());
-                    this.detailSelector(seed.detailSelector());
-                    this.totalPages(seed.totolPages());
-                    this.thread(seed.thread());
-                    this.timer(seed.startTime(), seed.interval());
-                    this.sleep(seed.sleep());
-                    this.sleepRange(seed.sleepRange());
-                    HttpProxy hp = FileUtil.formatProxy(seed.proxy());
-                    if (hp != null) {
-                        this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
-                    }
-                    this.userAgent(seed.userAgent());
-                    this.resourceSelector(seed.resourceSelector());
-                    this.downloadDisk(seed.downloadDisk());
-                    this.downloadHdfs(seed.downloadHdfs());
-                    this.javascriptSupport(seed.javascriptSupport());
-                    this.jdbc(seed.jdbc());
-                    this.lucene(seed.lucene());
-                    this.hbase(seed.hbase());
+            if ("ListDetail".equalsIgnoreCase(type) && clazz.isAnnotationPresent(ListDetail.class)) {
+                ListDetail seed = (ListDetail) clazz.getAnnotation(ListDetail.class);
+                this.pageMode(PageMode.list_detail);
+                this.fetchUrl(seed.url());
+                this.method(seed.method());
+                this.probe(seed.probeSelector(), seed.probeSleep());
+                this.detailSelector(seed.detailSelector());
+                this.totalPages(seed.totolPages());
+                this.thread(seed.thread());
+                this.timer(seed.startTime(), seed.interval());
+                this.sleep(seed.sleep());
+                this.sleepRange(seed.sleepRange());
+                HttpProxy hp = FileUtil.formatProxy(seed.proxy());
+                if (hp != null) {
+                    this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
                 }
+                this.userAgent(seed.userAgent());
+                this.resourceSelector(seed.resourceSelector());
+                this.downloadDisk(seed.downloadDisk());
+                this.downloadHdfs(seed.downloadHdfs());
+                this.javascriptSupport(seed.javascriptSupport());
+                this.jdbc(seed.jdbc());
+                this.lucene(seed.lucene());
+                this.hbase(seed.hbase());
                 this.parser(clazz);
-            } else if ("Site".equalsIgnoreCase(type)) {
-                if (clazz.isAnnotationPresent(Site.class)) {
-                    Site seed = (Site) clazz.getAnnotation(Site.class);
-                    this.pageMode(PageMode.site);
-                    this.fetchUrl(seed.url());
-                    this.method(seed.method());
-                    this.probe(seed.probeSelector(), seed.probeSleep());
-                    this.thread(seed.thread());
-                    this.timer(seed.startTime(), seed.interval());
-                    this.sleep(seed.sleep());
-                    this.sleepRange(seed.sleepRange());
-                    HttpProxy hp = FileUtil.formatProxy(seed.proxy());
-                    if (hp != null) {
-                        this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
-                    }
-                    this.userAgent(seed.userAgent());
-                    this.resourceSelector(seed.resourceSelector());
-                    this.downloadDisk(seed.downloadDisk());
-                    this.downloadHdfs(seed.downloadHdfs());
-                    this.javascriptSupport(seed.javascriptSupport());
-                    this.jdbc(seed.jdbc());
-                    this.lucene(seed.lucene());
-                    this.hbase(seed.hbase());
-                    this.elementSelectParser(seed.parser());
+                setDynamicField(clazz);
+            } else if ("Site".equalsIgnoreCase(type) && clazz.isAnnotationPresent(Site.class)) {
+                Site seed = (Site) clazz.getAnnotation(Site.class);
+                this.pageMode(PageMode.site);
+                this.fetchUrl(seed.url());
+                this.method(seed.method());
+                this.probe(seed.probeSelector(), seed.probeSleep());
+                this.thread(seed.thread());
+                this.timer(seed.startTime(), seed.interval());
+                this.sleep(seed.sleep());
+                this.sleepRange(seed.sleepRange());
+                HttpProxy hp = FileUtil.formatProxy(seed.proxy());
+                if (hp != null) {
+                    this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
                 }
+                this.userAgent(seed.userAgent());
+                this.resourceSelector(seed.resourceSelector());
+                this.downloadDisk(seed.downloadDisk());
+                this.downloadHdfs(seed.downloadHdfs());
+                this.javascriptSupport(seed.javascriptSupport());
+                this.jdbc(seed.jdbc());
+                this.lucene(seed.lucene());
+                this.hbase(seed.hbase());
                 this.parser(clazz);
-            } else if ("Single".equalsIgnoreCase(type)) {
-                if (clazz.isAnnotationPresent(Single.class)) {
-                    Single seed = (Single) clazz.getAnnotation(Single.class);
-                    this.pageMode(PageMode.single);
-                    this.fetchUrl(seed.url());
-                    this.method(seed.method());
-                    this.probe(seed.probeSelector(), seed.probeSleep());
-                    this.thread(seed.thread());
-                    this.timer(seed.startTime(), seed.interval());
-                    this.sleep(seed.sleep());
-                    this.sleepRange(seed.sleepRange());
-                    HttpProxy hp = FileUtil.formatProxy(seed.proxy());
-                    if (hp != null) {
-                        this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
-                    }
-                    this.userAgent(seed.userAgent());
-                    this.resourceSelector(seed.resourceSelector());
-                    this.downloadDisk(seed.downloadDisk());
-                    this.downloadHdfs(seed.downloadHdfs());
-                    this.javascriptSupport(seed.javascriptSupport());
-                    this.jdbc(seed.jdbc());
-                    this.lucene(seed.lucene());
-                    this.hbase(seed.hbase());
+                setDynamicField(clazz);
+            } else if ("Single".equalsIgnoreCase(type) && clazz.isAnnotationPresent(Single.class)) {
+                Single seed = (Single) clazz.getAnnotation(Single.class);
+                this.pageMode(PageMode.single);
+                this.fetchUrl(seed.url());
+                this.method(seed.method());
+                this.probe(seed.probeSelector(), seed.probeSleep());
+                this.thread(seed.thread());
+                this.timer(seed.startTime(), seed.interval());
+                this.sleep(seed.sleep());
+                this.sleepRange(seed.sleepRange());
+                HttpProxy hp = FileUtil.formatProxy(seed.proxy());
+                if (hp != null) {
+                    this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
                 }
+                this.userAgent(seed.userAgent());
+                this.resourceSelector(seed.resourceSelector());
+                this.downloadDisk(seed.downloadDisk());
+                this.downloadHdfs(seed.downloadHdfs());
+                this.javascriptSupport(seed.javascriptSupport());
+                this.jdbc(seed.jdbc());
+                this.lucene(seed.lucene());
+                this.hbase(seed.hbase());
                 this.parser(clazz);
-            } else if ("Cascade".equalsIgnoreCase(type)) {
-                if (clazz.isAnnotationPresent(Cascade.class)) {//有两个Seed类，一个是annotation，一个是实体类
-                    Cascade seed = (Cascade) clazz.getAnnotation(Cascade.class);
-                    this.pageMode(PageMode.cascade);
-                    this.fetchUrl(seed.url());
-                    this.method(seed.method());
-                    this.probe(seed.probeSelector(), seed.probeSleep());
-                    this.thread(seed.thread());
-                    this.timer(seed.startTime(), seed.interval());
-                    this.sleep(seed.sleep());
-                    this.sleepRange(seed.sleepRange());
-                    HttpProxy hp = FileUtil.formatProxy(seed.proxy());
-                    if (hp != null) {
-                        this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
-                    }
-                    this.userAgent(seed.userAgent());
-                    this.resourceSelector(seed.resourceSelector());
-                    this.downloadDisk(seed.downloadDisk());
-                    this.downloadHdfs(seed.downloadHdfs());
-                    this.javascriptSupport(seed.javascriptSupport());
-                    this.jdbc(seed.jdbc());
-                    this.lucene(seed.lucene());
-                    this.hbase(seed.hbase());
+                setDynamicField(clazz);
+            } else if ("Cascade".equalsIgnoreCase(type) && clazz.isAnnotationPresent(Cascade.class)) {
+                Cascade seed = (Cascade) clazz.getAnnotation(Cascade.class);
+                this.pageMode(PageMode.cascade);
+                this.fetchUrl(seed.url());
+                this.method(seed.method());
+                this.probe(seed.probeSelector(), seed.probeSleep());
+                this.thread(seed.thread());
+                this.timer(seed.startTime(), seed.interval());
+                this.sleep(seed.sleep());
+                this.sleepRange(seed.sleepRange());
+                HttpProxy hp = FileUtil.formatProxy(seed.proxy());
+                if (hp != null) {
+                    this.proxy(hp.getIp(), Integer.valueOf(hp.getPort()));
                 }
+                this.userAgent(seed.userAgent());
+                this.resourceSelector(seed.resourceSelector());
+                this.downloadDisk(seed.downloadDisk());
+                this.downloadHdfs(seed.downloadHdfs());
+                this.javascriptSupport(seed.javascriptSupport());
+                this.jdbc(seed.jdbc());
+                this.lucene(seed.lucene());
+                this.hbase(seed.hbase());
                 this.parser(clazz);
-            } else if ("Sync".equalsIgnoreCase(type)) {
-                if (clazz.isAnnotationPresent(Sync.class)) {
-                    Sync sync = (Sync) clazz.getAnnotation(Sync.class);
-                    if (AbstractConfig.ftp_node.equals(sync.protocal())) {
-                        this.ftp(sync.host(), sync.port(), sync.username(), sync.password());
-                    } else if (AbstractConfig.rsync_node.equals(sync.protocal())) {
-                        this.rsync(sync.host(), sync.username(), sync.isModule(), sync.module());
-                    } else if (AbstractConfig.scp_node.equals(sync.protocal())) {
-                        this.scp(sync.host(), sync.username(), sync.dir(), sync.port());
-                    }
+                setDynamicField(clazz);
+            } else if ("Sync".equalsIgnoreCase(type) && clazz.isAnnotationPresent(Sync.class)) {
+                Sync sync = (Sync) clazz.getAnnotation(Sync.class);
+                if (AbstractConfig.ftp_node.equals(sync.protocal())) {
+                    this.ftp(sync.host(), sync.port(), sync.username(), sync.password());
+                } else if (AbstractConfig.rsync_node.equals(sync.protocal())) {
+                    this.rsync(sync.host(), sync.username(), sync.isModule(), sync.module());
+                } else if (AbstractConfig.scp_node.equals(sync.protocal())) {
+                    this.scp(sync.host(), sync.username(), sync.dir(), sync.port());
                 }
-            } else if ("Config".equalsIgnoreCase(type)) {
-                 if (clazz.isAnnotationPresent(Sync.class)) {
-                	 Config config = (Config) clazz.getAnnotation(Config.class);
-                	 if("url".equalsIgnoreCase(config.downloadFilenameRule())){
-                		 this.downloadFilenameRule(true);
-                	 } else {
-                		 this.downloadFilenameRule(false);
-                	 }
-                     this.email(config.email());
-                 }
+            } else if ("Config".equalsIgnoreCase(type) && clazz.isAnnotationPresent(Sync.class)) {
+            	 Config config = (Config) clazz.getAnnotation(Config.class);
+            	 if("url".equalsIgnoreCase(config.downloadFilenameRule())){
+            		 this.downloadFilenameRule(true);
+            	 } else {
+            		 this.downloadFilenameRule(false);
+            	 }
+                 this.email(config.email());
             }
         }
         return this;

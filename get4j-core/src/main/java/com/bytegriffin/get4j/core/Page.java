@@ -211,6 +211,21 @@ public class Page {
         Elements eles = doc.select(jsoupSelect);
         return eles.text();
     }
+    
+    /**
+     * 根据Jsoup原生支持的cssSelect或正则表达式解析Html
+     *
+     * @param jsoupSelect jsoup支持的select字符串
+     * @return String
+     */
+    public String jsoupHtml(String jsoupSelect) {
+    	if(Strings.isNullOrEmpty(this.htmlContent)){
+    		return null;
+    	}
+        Document doc = Jsoup.parse(this.htmlContent);
+        Elements eles = doc.select(jsoupSelect);
+        return eles.html();
+    }
 
     /**
      * 根据Jsoup原生支持的cssSelect或正则表达式解析Html
