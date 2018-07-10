@@ -407,15 +407,15 @@ public class Spider {
      * @param parser 自定义解析类
      * @return Spider
      */
-    public Spider parser(Class<?> parser) {
+    public Spider parser(Class<? extends PageParser> parser) {
         seed.setParseClassImpl(parser.getName());
         return this;
     }
 
     /**
      * 自定义页面解析接口，用于Lambda表达式
-     * @param parser
-     * @return
+     * @param parser Lambda表达式或PageParser实现类
+     * @return Spider
      */
     public Spider parser(PageParser parser) {
     	seed.setPageParser(parser);

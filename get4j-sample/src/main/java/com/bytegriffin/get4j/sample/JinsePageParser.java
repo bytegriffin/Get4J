@@ -32,8 +32,8 @@ public class JinsePageParser implements PageParser {
     /**
      * 抓取这类站点，需要人工去分析下页面中动态数据的实际地址，找到之后为了方便先设置limit为2条，
      * ps：这个网站访问太多会出现“Too Many Attempts.”字样，爬取时需要隔一定时间抓
-     * @param args
-     * @throws Exception
+     * @param args args
+     * @throws Exception Exception
      */
     public static void main(String[] args) throws Exception {
         Spider.single().fetchUrl("http://api.jinse.com/v4/live/list?limit=2").defaultUserAgent()

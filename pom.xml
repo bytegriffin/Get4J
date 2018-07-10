@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.bytegriffin</groupId>
 	<artifactId>get4j-parent</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>pom</packaging>
 	<name>get4j-parent</name>
 	<url>https://github.com/bytegriffin/Get4J</url>
@@ -435,6 +435,7 @@
 						<version>3.0.1</version>
 						<executions>
 							<execution>
+								<id>attach-javadocs</id>
 								<phase>package</phase>
 								<goals>
 									<goal>jar</goal>
