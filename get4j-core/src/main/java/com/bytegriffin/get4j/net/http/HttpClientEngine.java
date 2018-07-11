@@ -513,7 +513,7 @@ public class HttpClientEngine extends AbstractHttpEngine implements HttpEngine {
             setHost(page, logger);
             httpClient = Globals.HTTP_CLIENT_BUILDER_CACHE.get(page.getSeedName()).build();
             request = getRquest(page);
-            request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            request.addHeader("Accept", DefaultConfig.http_header_accept);
             request.addHeader("Host", page.getHost());
             HttpResponse response = httpClient.execute(request);
             boolean isvisit = isVisit(httpClient, page, request, response, logger);
@@ -895,7 +895,7 @@ public class HttpClientEngine extends AbstractHttpEngine implements HttpEngine {
             setUserAgent(page.getSeedName());
             httpClient = Globals.HTTP_CLIENT_BUILDER_CACHE.get(page.getSeedName()).build();
             request = getRquest(page);
-            request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            request.addHeader("Accept", DefaultConfig.http_header_accept);
             HttpResponse response = httpClient.execute(request);
             boolean isvisit = isVisit(httpClient, page, request, response, logger);
             if (!isvisit) {

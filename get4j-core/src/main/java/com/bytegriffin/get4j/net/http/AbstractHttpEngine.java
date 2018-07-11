@@ -315,13 +315,13 @@ public abstract class AbstractHttpEngine {
 			} else {
 				page.setHtmlContent(content);
 			}
-			// json文件中一般不好嗅探titile属性
+			// json文件中一般不好嗅探title属性
 			page.setTitle(UrlAnalyzer.getTitle(content));
 		} else if (isJsonPage(contentType)) {
 			page.setJsonContent(content);
 		} else if (isXmlPage(contentType, content)) {
 			page.setXmlContent(content);
-			// json文件中一般不好嗅探titile属性
+			// json文件中一般不好嗅探title属性
 			page.setTitle(UrlAnalyzer.getTitle(content));
 		} else { // 不是html也不是json，那么只能是resource的链接了，xml也是
 			page.getResources().add(page.getUrl());

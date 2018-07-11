@@ -258,6 +258,11 @@ public final class SpiderEngine {
 				fe.init(seed);
 				chain.addProcess(fe);
 				subProcess.append("SingleFetcher");
+			} else if (PageMode.list_detail.equals(seed.getPageMode()) || seed.isListDetailMode()) {// 配置文件设置或者api设置两种判断
+				ListDetailFetcher ld = new ListDetailFetcher();
+				ld.init(seed);
+				chain.addProcess(ld);
+				subProcess.append("ListDetailFetcher");
 			} else if (PageMode.cascade.equals(seed.getPageMode())) {
 				CascadeFetcher mu = new CascadeFetcher();
 				mu.init(seed);
@@ -268,11 +273,6 @@ public final class SpiderEngine {
 				ld.init(seed);
 				chain.addProcess(ld);
 				subProcess.append("SiteFetcher");
-			} else if (PageMode.list_detail.equals(seed.getPageMode()) || seed.isListDetailMode()) {// 配置文件设置或者api设置两种判断
-				ListDetailFetcher ld = new ListDetailFetcher();
-				ld.init(seed);
-				chain.addProcess(ld);
-				subProcess.append("ListDetailFetcher");
 			}
 
 			if (Globals.DYNAMIC_FIELDS_CACHE.get(seedName) != null

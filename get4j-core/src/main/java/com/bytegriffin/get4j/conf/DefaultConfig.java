@@ -54,7 +54,8 @@ public class DefaultConfig {
     public static final String win_chromedriver = System.getProperty("user.dir") + File.separator + "bin" + File.separator + "chromedriver.exe";
     public static final String linux_chromedriver = System.getProperty("user.dir") + File.separator + "bin" + File.separator + "chromedriver";
     public static final String chromedriver_log = System.getProperty("user.dir") + File.separator + "log" + File.separator + "get4j.log";
-
+    public static final String http_header_accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    
     /**
      * 默认 user agent 配置文件
      */

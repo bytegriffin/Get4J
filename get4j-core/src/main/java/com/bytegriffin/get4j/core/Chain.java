@@ -9,9 +9,7 @@ public class Chain {
     List<Process> list = Lists.newArrayList();
 
     public void execute(Page page) {
-        for (Process p : list) {
-            p.execute(page);
-        }
+    	list.forEach(p -> p.execute(page));
     }
 
     public Chain addProcess(Process p) {

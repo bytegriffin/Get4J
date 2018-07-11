@@ -204,7 +204,8 @@ public class Seed {
 
     /**
      * 当用户没有设置PageMode时候
-     * 也可以判断当前是否是list_detail模式
+     * 程序也可以判断当前是否是list_detail模式
+     * 即：detailSelector方法不为空就说明有详情页要抓取
      *
      * @return boolean
      */
