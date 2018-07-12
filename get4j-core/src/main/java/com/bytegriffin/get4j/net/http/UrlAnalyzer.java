@@ -9,6 +9,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -293,12 +295,12 @@ public final class UrlAnalyzer {
      *
      * @return HashSet
      */
-    public final HashSet<String> sniffDetailLinks() {
+    public final LinkedHashSet<String> sniffDetailLinks() {
         String detailSelect = Globals.FETCH_DETAIL_SELECT_CACHE.get(page.getSeedName());
         if (Strings.isNullOrEmpty(detailSelect)) {
             return null;
         }
-        HashSet<String> urls = Sets.newHashSet();
+        LinkedHashSet<String> urls = Sets.newLinkedHashSet();
         if (page.isHtmlContent()) {// html格式会启动jsoup抓取detail链接
             String siteUrl = page.getUrl();
             String content = page.getHtmlContent();
@@ -372,7 +374,7 @@ public final class UrlAnalyzer {
      * 如果ResourceSelector配置了none，什么都不做，即表示：什么资源都不抓取，全部过滤 <br>
      */
     public final void sniffAndSetResources() {
-        HashSet<String> resources = Sets.newHashSet();
+    	LinkedHashSet<String> resources = Sets.newLinkedHashSet();
         FetchResourceSelector resourceselector = Globals.FETCH_RESOURCE_SELECTOR_CACHE.get(page.getSeedName());
         if (resourceselector == null || resourceselector.isConfigAll()) {// 如果ResourceSelector配置了all或者默认没有配置此项
             if (page.isHtmlContent()) {// html格式在all模式下会启动jsoup抓取各种资源的src和href
@@ -439,7 +441,7 @@ public final class UrlAnalyzer {
      */
     public Map<String, String> mappingDetailLinkAndAvatar() {
         String detailSelect = Globals.FETCH_DETAIL_SELECT_CACHE.get(page.getSeedName());
-        Map<String, String> map = Maps.newHashMap();
+        LinkedHashMap<String, String> map = Maps.newLinkedHashMap();
         FetchResourceSelector resourceselector = Globals.FETCH_RESOURCE_SELECTOR_CACHE.get(page.getSeedName());
         List<String> selectors = resourceselector.getSelectors();
         if (page.isHtmlContent()) {
@@ -510,11 +512,11 @@ public final class UrlAnalyzer {
     /**
      * 设置xml或json的detaillink与avatar的映射关系
      *
-     * @param detailLink List<String>
-     * @param avatars    List<String>
-     * @param map        Map<String, String> key：detaillink value：avatar
+     * @param detailLink List
+     * @param avatars    List
+     * @param map        Map<String, String> key：detaillink value：extra map
      */
-    private void setDetailLinkAvatarMapping(List<String> detailLink, List<String> avatars, Map<String, String> map) {
+    private void setDetailLinkAvatarMapping(List<String> detailLink, List<String> avatars, LinkedHashMap<String, String> map) {
         if (avatars == null || avatars.size() == 0) {
             return;
         }
@@ -536,8 +538,7 @@ public final class UrlAnalyzer {
             String avatar = avatars.get(i);
             if (Strings.isNullOrEmpty(avatar) || avatar.startsWith("#") || avatar.equalsIgnoreCase("null")) {
                 avatar = null;
-            }
-            if (!Strings.isNullOrEmpty(avatar)) {
+            } else if (!Strings.isNullOrEmpty(avatar)) {
                 avatar = getAbsoluteURL(page.getUrl(), avatar);
             }
             map.put(dlink, avatar);
@@ -556,8 +557,8 @@ public final class UrlAnalyzer {
      *
      * @param isResource 是否是资源文件，当isResource=true时，此urls存放的是资源的url，否则为普通链接url
      */
-	private HashSet<String> sniffUrlFromJson(boolean isResource) {
-        HashSet<String> urls = Sets.newHashSet();
+	private LinkedHashSet<String> sniffUrlFromJson(boolean isResource) {
+		LinkedHashSet<String> urls = Sets.newLinkedHashSet();
         JSONObject jsonObj = null;
         try{
         	jsonObj = JSONObject.parseObject(page.getJsonContent());
@@ -566,7 +567,7 @@ public final class UrlAnalyzer {
         	String obj = "{ 'root':"+array.toJSONString()+"}";
         	jsonObj = JSONArray.parseObject(obj);
         }
-        HashSet<String> sets = Sets.newHashSet();
+        LinkedHashSet<String> sets = Sets.newLinkedHashSet();
         sets = travelJson(jsonObj, sets);
         for (String url : sets) {
             if (FetchResourceSelector.isFindResources(url) == isResource) {
@@ -583,7 +584,7 @@ public final class UrlAnalyzer {
      * @param url     HashSet<String>
      * @return HashSet<String>
      */
-    private HashSet<String> travelJson(JSONObject jsonObj, HashSet<String> url) {
+    private LinkedHashSet<String> travelJson(JSONObject jsonObj, LinkedHashSet<String> url) {
         if (jsonObj == null) {
             return url;
         }
@@ -617,12 +618,12 @@ public final class UrlAnalyzer {
      * @param isResource 是否是资源链接 true：是  false：不是
      * @return HashSet<String>
      */
-    private HashSet<String> sniffUrlFromXml(boolean isResource) {
+    private LinkedHashSet<String> sniffUrlFromXml(boolean isResource) {
         Document doc = Jsoup.parse(page.getXmlContent(), "", Parser.xmlParser());
         List<Node> nodelist = doc.childNodes();
-        HashSet<String> sets =  Sets.newHashSet();
+        LinkedHashSet<String> sets =  Sets.newLinkedHashSet();
         sets = travelXml(nodelist, sets);
-        HashSet<String> urls =  Sets.newHashSet();
+        LinkedHashSet<String> urls =  Sets.newLinkedHashSet();
         for (String url : sets) {
             if (FetchResourceSelector.isFindResources(url) == isResource) {
                 urls.add(url);
@@ -638,7 +639,7 @@ public final class UrlAnalyzer {
      * @param urls     HashSet<String>
      * @return HashSet<String>
      */
-    private HashSet<String> travelXml(List<Node> nodelist, HashSet<String> urls) {
+    private LinkedHashSet<String> travelXml(List<Node> nodelist, LinkedHashSet<String> urls) {
         if (nodelist == null || nodelist.size() == 0) {
             return urls;
         }

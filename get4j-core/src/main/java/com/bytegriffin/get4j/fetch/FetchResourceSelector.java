@@ -1,5 +1,17 @@
 package com.bytegriffin.get4j.fetch;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
+
 import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.core.Globals;
 import com.bytegriffin.get4j.core.Page;
@@ -8,16 +20,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 资源精确选择器 比如过滤图片、js文件等等。。。
@@ -166,11 +168,11 @@ public class FetchResourceSelector {
      * @param urlPrefix   url前缀字符串
      * @return HashSet
      */
-    public static HashSet<String> jsonPath(String jsonContent, String jsonPath, String urlPrefix) {
+    public static LinkedHashSet<String> jsonPath(String jsonContent, String jsonPath, String urlPrefix) {
         if (urlPrefix == null) {
             urlPrefix = "";
         }
-        HashSet<String> links = new HashSet<>();
+        LinkedHashSet<String> links = new LinkedHashSet<>();
         Object obj = JsonPath.read(jsonContent, jsonPath);
         if (obj instanceof List) {
             List<?> list = (List<?>) obj;//可能是任何类型
@@ -218,8 +220,8 @@ public class FetchResourceSelector {
      * @param select     select
      * @return HashSet
      */
-    public static HashSet<String> xmlSelect(String xmlContent, String select) {
-        HashSet<String> urls = Sets.newHashSet();
+    public static LinkedHashSet<String> xmlSelect(String xmlContent, String select) {
+    	LinkedHashSet<String> urls = Sets.newLinkedHashSet();
         Document doc = Jsoup.parse(xmlContent, "", Parser.xmlParser());
         String attrKey = "";
         if (select.contains("[") && select.contains("]")) {
