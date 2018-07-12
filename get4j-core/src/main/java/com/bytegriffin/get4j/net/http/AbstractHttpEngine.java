@@ -224,10 +224,7 @@ public abstract class AbstractHttpEngine {
 	/**
 	 * 设置页面host 可以将它当作request中header的host属性使用
 	 *
-	 * @param page     Page//		else if (response instanceof WebResponse) {
-//			WebResponse newresponse = (WebResponse) response;
-//			statusCode = newresponse.getStatusCode();
-//		}
+	 * @param page     Page
 	 * @param logger  Logger
 	 */
 	void setHost(Page page, Logger logger) {
