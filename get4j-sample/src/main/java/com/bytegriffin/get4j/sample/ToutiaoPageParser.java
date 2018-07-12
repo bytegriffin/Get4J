@@ -11,13 +11,17 @@ public class ToutiaoPageParser implements PageParser {
 
     @Override
     public void parse(Page page) {
-        System.err.println("页面标题："+page.getTitle()+" 页面链接:"+page.getUrl());
+    	if(page.isListPage()){ //第一次返回的是列表页数据
+    		System.err.println(page.json("$.data[*].item_id"));
+    	} else { //之后返回的是详情页数据
+    		System.err.println(page.getTitle() + "  " +page.getUrl());
+    	}
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("https://www.toutiao.com/api/pc/feed/?max_behot_time=1523000220&category=__all__&utm_source=toutiao&widen=1&tadrequire=false&as=A1951A5C273285F&cp=5AC76218657F8E1&_signature=sSIE6xAb6.M-iH1Yb7d--rEiBP")
-        	.detailSelector("https://www.toutiao.com/$.data[*].source_url").defaultUserAgent()
-        	.parser(ToutiaoPageParser.class).thread(1).start();
+        Spider.list_detail().fetchUrl("https://www.toutiao.com/api/pc/feed/?max_behot_time=1531379657&category=__all__&utm_source=toutiao&widen=1&tadrequire=false&as=A1B5CBA4C700FA9&cp=5B47702F5A894E1&_signature=gawk4xAX2vhxdNrxSlJWBoGsJP")
+        	.detailSelector("https://www.toutiao.com/$.data[*].source_url")
+        	.defaultUserAgent().parser(ToutiaoPageParser.class).thread(1).start();
     }
 
 }
