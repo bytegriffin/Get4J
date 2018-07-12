@@ -107,6 +107,7 @@ public class ListDetailFetcher implements Process {
             page.setHost(detailPage.getHost());
             page.setUrl(detailPage.getUrl());
             page.setMethod(detailPage.getMethod());
+            page.setListPage(false);
 
             logger.info("线程[{}]抓取种子[{}]的url[{}]完成。", Thread.currentThread().getName(), page.getSeedName() , page.getUrl() );
         }

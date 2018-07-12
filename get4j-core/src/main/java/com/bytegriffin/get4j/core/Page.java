@@ -93,6 +93,10 @@ public class Page {
      * 自定义动态字段
      */
     private Map<String, Object> fields = Maps.newHashMap();
+    /**
+     * 是否为列表页
+     */
+    private boolean isListPage = true;
 
     public Page() {
     }
@@ -462,7 +466,7 @@ public class Page {
         this.avatar = avatar;
     }
 
-    public String getResourceSavePath() {
+	public String getResourceSavePath() {
         return resourceSavePath;
     }
 
@@ -508,6 +512,14 @@ public class Page {
 
 	public void setParams(Map<String, String> params) {
 		this.params = params;
+	}
+
+	public boolean isListPage() {
+		return isListPage;
+	}
+
+	public void setListPage(boolean isListPage) {
+		this.isListPage = isListPage;
 	}
 
 }
