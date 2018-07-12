@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.alibaba.fastjson.JSONPath;
 import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.monitor.HealthChecker;
@@ -24,15 +25,13 @@ import com.bytegriffin.get4j.net.sync.RsyncSyncer;
 import com.bytegriffin.get4j.net.sync.ScpSyncer;
 import com.bytegriffin.get4j.probe.PageChangeProber;
 import com.bytegriffin.get4j.store.FailUrlStorage;
+import com.bytegriffin.get4j.util.CommandUtil;
 import com.bytegriffin.get4j.util.DateUtil;
 import com.bytegriffin.get4j.util.FileUtil;
 import com.bytegriffin.get4j.util.Sleep;
-import com.bytegriffin.get4j.util.CommandUtil;
 import com.bytegriffin.get4j.util.StringUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.bytegriffin.get4j.core.UrlQueue;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Seed加载器：加载每个seed，将seed中url分配给各个worker工作线程
@@ -224,7 +223,7 @@ public class Launcher extends TimerTask implements Command {
 				Page page = Globals.HTTP_ENGINE_CACHE.get(seed.getSeedName())
 						.getPageContent(new Page(seed.getSeedName(), UrlAnalyzer.formatListDetailUrl(fetchUrl), seed.getFetchHttpMethod()));
 				if (totalPages.contains(DefaultConfig.json_path_prefix)) {// json格式
-					int totalPage = JsonPath.read(page.getJsonContent(), totalPages);// Json会自动转换类型
+					int totalPage = (Integer)JSONPath.read(page.getJsonContent(), totalPages);
 					totalPages = String.valueOf(totalPage);// 所以需要再次转换
 				} else {// html格式
 					Document doc = Jsoup.parse(page.getHtmlContent());

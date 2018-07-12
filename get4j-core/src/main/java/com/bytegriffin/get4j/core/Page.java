@@ -10,11 +10,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import com.alibaba.fastjson.JSONPath;
 import com.bytegriffin.get4j.fetch.FetchResourceSelector;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Page对象
@@ -194,8 +194,8 @@ public class Page {
             return null;
         }
         try{
-        	return  JsonPath.read(this.getContent(), jsonPath).toString();
-        }catch(com.jayway.jsonpath.PathNotFoundException e){
+        	return JSONPath.read(this.getContent(), jsonPath).toString();
+        }catch(Exception e){
         	return null;
         }
         

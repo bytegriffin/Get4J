@@ -14,9 +14,14 @@ public class CtripPageParser implements PageParser {
         System.err.println("酒店名称："+page.getTitle() + " 酒店地址： " + page.getUrl());
     }
 
+    /**
+     * Json数据中包含html属性
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://hotels.ctrip.com/Domestic/Tool/AjaxHotelList.aspx?cityId=1&cityName=北京&page={1}")
-                .detailSelector("http://hotels.ctrip.com/$.hotelPositionJSON[*].url").parser(CtripPageParser.class)
+        Spider.list_detail().fetchUrl("http://hotels.ctrip.com/Domestic/Tool/AjaxHotelList.aspx?cityId=1&page={1}")
+                .detailSelector("http://hotels.ctrip.com/$.hotelPositionJSON.url").parser(CtripPageParser.class)
                 .thread(1).start();
     }
 

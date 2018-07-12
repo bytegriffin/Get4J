@@ -55,7 +55,6 @@
 		<jsoup.version>1.11.3</jsoup.version>
 		<selenium.version>3.13.0</selenium.version>
 		<fastjson.version>1.2.47</fastjson.version>
-		<jsonpath.version>2.4.0</jsonpath.version>
 		<hikaricp.version>3.2.0</hikaricp.version>
 		<mysql-connector.version>8.0.11</mysql-connector.version>
 		<mongo.version>3.8.0</mongo.version>
@@ -179,12 +178,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.jayway.jsonpath</groupId>
-				<artifactId>json-path</artifactId>
-				<version>${jsonpath.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
 				<version>${hikaricp.version}</version>
@@ -255,7 +248,6 @@
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
-
 
 			<dependency>
 				<groupId>redis.clients</groupId>

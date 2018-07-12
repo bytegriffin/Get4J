@@ -19,7 +19,7 @@ public class JinsePageParser implements PageParser {
 	 */
     @Override
     public void parse(Page page) {
-        String str = page.json("$.list[0].lives[*]");//根据jsonpath的查询规则来获取所有json字符串数组
+        String str = page.json("$.list[0].lives");//根据jsonpath的查询规则来获取所有json字符串数组
         JSONArray jsonArray = JSONArray.parseArray(str);//之后将json数组解析为fastjson对象
         //最后循环便利每条json数据中的具体内容
         for (Iterator<Object> iterator = jsonArray.iterator(); iterator.hasNext();) { 
@@ -36,7 +36,7 @@ public class JinsePageParser implements PageParser {
      * @throws Exception Exception
      */
     public static void main(String[] args) throws Exception {
-        Spider.single().fetchUrl("http://api.jinse.com/v4/live/list?limit=2").defaultUserAgent()
+        Spider.single().fetchUrl("http://api.jinse.com/v4/live/list?limit=10").defaultUserAgent()
                 .parser(JinsePageParser.class).thread(1).start(); 
     }
 

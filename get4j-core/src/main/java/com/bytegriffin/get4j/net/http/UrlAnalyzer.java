@@ -29,6 +29,7 @@ import org.jsoup.select.Elements;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.core.ExceptionCatcher;
 import com.bytegriffin.get4j.core.Globals;
@@ -40,8 +41,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * Url分析器：负责解析页面所有的url
@@ -117,8 +116,8 @@ public final class UrlAnalyzer {
             }
         } else if (page.isJsonContent()) {
             try {
-            	text = JsonPath.read(page.getJsonContent(), select);
-            } catch (PathNotFoundException e) {
+            	text = (String)JSONPath.read(page.getJsonContent(), select);
+            } catch (Exception e) {
             	EmailSender.sendMail(e);
                 ExceptionCatcher.addException(page.getSeedName(), e);
                 logger.error("种子[" + page.getSeedName() + "]在使用Jsonpath[" + select + "]定位解析Json字符串时出错，", e);
@@ -167,8 +166,8 @@ public final class UrlAnalyzer {
             content = eles.toString();
         } else if (page.isJsonContent()) {
             try {//Json中暂时只支持获取属性
-            	content = JsonPath.read(page.getJsonContent(), select);
-            } catch (PathNotFoundException e) {
+            	content = (String)JSONPath.read(page.getJsonContent(), select);
+            } catch (Exception e) {
             	EmailSender.sendMail(e);
                 ExceptionCatcher.addException(page.getSeedName(), e);
                 logger.error("种子[" + page.getSeedName() + "]在使用Jsonpath[" + select + "]定位解析Json字符串时出错，", e);

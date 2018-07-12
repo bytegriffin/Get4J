@@ -16,7 +16,7 @@ public class MeituanPageParser implements PageParser {
 
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://bj.meituan.com/meishi/api/poi/getPoiList?cityName=北京&page={1}").defaultUserAgent()
-        			.detailSelector("http://www.meituan.com/meishi/$.data.poiInfos[*].poiId").parser(MeituanPageParser.class).thread(1).start();
+        			.detailSelector("http://www.meituan.com/meishi/$.data.poiInfos.poiId").parser(MeituanPageParser.class).thread(1).start();
     }
 
 }

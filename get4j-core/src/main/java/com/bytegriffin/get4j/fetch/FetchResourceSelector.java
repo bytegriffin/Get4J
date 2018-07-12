@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
+import com.alibaba.fastjson.JSONPath;
 import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.core.Globals;
 import com.bytegriffin.get4j.core.Page;
@@ -19,7 +20,6 @@ import com.bytegriffin.get4j.net.http.UrlAnalyzer;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * 资源精确选择器 比如过滤图片、js文件等等。。。
@@ -173,7 +173,7 @@ public class FetchResourceSelector {
             urlPrefix = "";
         }
         LinkedHashSet<String> links = new LinkedHashSet<>();
-        Object obj = JsonPath.read(jsonContent, jsonPath);
+        Object obj = JSONPath.read(jsonContent, jsonPath);
         if (obj instanceof List) {
             List<?> list = (List<?>) obj;//可能是任何类型
             if (list.size() > 0) {
@@ -201,7 +201,7 @@ public class FetchResourceSelector {
             urlPrefix = "";
         }
         List<String> links = new ArrayList<>();
-        Object obj = JsonPath.read(jsonContent, jsonPath);
+        Object obj = JSONPath.read(jsonContent, jsonPath);
         if (obj instanceof List) {
             List<String> list = (List<String>) obj;
             for (String link : list) {
