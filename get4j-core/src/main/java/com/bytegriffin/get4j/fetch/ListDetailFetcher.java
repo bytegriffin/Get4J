@@ -1,7 +1,7 @@
 package com.bytegriffin.get4j.fetch;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,11 +11,11 @@ import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.core.Globals;
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.core.Process;
+import com.bytegriffin.get4j.core.UrlQueue;
 import com.bytegriffin.get4j.net.http.HttpEngine;
 import com.bytegriffin.get4j.net.http.UrlAnalyzer;
 import com.bytegriffin.get4j.util.DateUtil;
 import com.google.common.base.Strings;
-import com.bytegriffin.get4j.core.UrlQueue;
 
 /**
  * List-Detail格式的页面抓取器<br>
@@ -68,7 +68,7 @@ public class ListDetailFetcher implements Process {
             }
 
             // 4.设置Page的detailPage属性
-            HashSet<String> links = UrlAnalyzer.custom(page).sniffDetailLinks();
+            LinkedHashSet<String> links = UrlAnalyzer.custom(page).sniffDetailLinks();
             if (links != null && links.size() > 0) {
                 UrlQueue.addUnVisitedLinks(page.getSeedName(), links);
                 page.setDetailLinks(links);

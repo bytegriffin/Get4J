@@ -2,7 +2,7 @@ package com.bytegriffin.get4j.core;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,7 @@ public class Page {
     /**
      * 当前页面中的资源文件：js、jpg、css等文件
      */
-    private HashSet<String> resources = Sets.newHashSet();
+    private LinkedHashSet<String> resources = Sets.newLinkedHashSet();
     /**
      * 当前资源文件存储路径
      */
@@ -88,7 +88,7 @@ public class Page {
     /**
      * 当启动list_detail抓取模式时，每个列表所对应的详情页
      */
-    private HashSet<String> detailLinks = Sets.newHashSet();
+    private LinkedHashSet<String> detailLinks = Sets.newLinkedHashSet();
     /**
      * 自定义动态字段
      */
@@ -426,15 +426,15 @@ public class Page {
         this.title = title;
     }
 
-    public HashSet<String> getResources() {
+    public LinkedHashSet<String> getResources() {
         return resources;
     }
 
-    public void setResources(HashSet<String> resources) {
+    public void setResources(LinkedHashSet<String> resources) {
         this.resources = resources;
     }
 
-    public HashSet<String> getDetailLinks() {
+    public LinkedHashSet<String> getDetailLinks() {
         return detailLinks;
     }
 
@@ -446,7 +446,7 @@ public class Page {
         this.host = host;
     }
 
-    public void setDetailLinks(HashSet<String> detailLinks) {
+    public void setDetailLinks(LinkedHashSet<String> detailLinks) {
         this.detailLinks = detailLinks;
     }
 
