@@ -24,8 +24,10 @@ import com.google.common.base.Strings;
  * 2.页面框架没变，只是新增了动态数据，此时需要爬取<br>
  * 3.页面改版：需要重新设置爬虫<br>
  * 4.页面url不能再被访问：需要查明情况再定<br>
- * 注意：应尽量避免监控整个页面内容，即：fetchProbeSelector值尽量避免设置为default<br>
+ * 注意：
+ * 1.应尽量避免监控整个页面内容，即：fetchProbeSelector值尽量避免设置为default<br>
  * 因为当每次请求动态页面时，页面上都可能会生成一个随机字符串，这样就导致程序判断每次访问页面都发生了变化。
+ * 2.不支持某些动态url（带时间戳参数）的页面
  */
 public class PageChangeProber {
 

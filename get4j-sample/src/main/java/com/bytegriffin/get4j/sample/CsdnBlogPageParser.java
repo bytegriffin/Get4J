@@ -13,13 +13,13 @@ public class CsdnBlogPageParser implements PageParser {
     	} else { //之后返回的是详情页数据
     		System.err.println(page.getUrl() + "  ");
     	}
-        
     }
 
     public static void main(String[] args) throws Exception {//blog_list clearfix
-        Spider.list_detail().fetchUrl("https://blog.csdn.net/api/articles?type=more&category=home&shown_offset=1531325255862708")
+        Spider.list_detail().fetchUrl("https://blog.csdn.net/api/articles?type=more&category=home&shown_offset=ad1531325255862708")
                 .detailSelector("$.articles.url")
                 .parser(CsdnBlogPageParser.class).defaultUserAgent()
+                .probe("$.articles.id", 10)
                 //.jdbc("jdbc:mysql://localhost:3306/get4j?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&user=root&password=root")
                 //.mongodb("mongodb://localhost:27017")
                 .thread(1).start();

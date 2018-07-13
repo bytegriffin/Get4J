@@ -16,6 +16,7 @@ import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.core.ExceptionCatcher;
 import com.bytegriffin.get4j.send.EmailSender;
 import com.bytegriffin.get4j.util.MD5Util;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import io.protostuff.LinkedBuffer;
@@ -61,6 +62,9 @@ public class ProbeFileStorage {
             String md5url = MD5Util.convert(url);
             while (is.read(buff, 0, probe_buffer_length) > 0) {
             	ProbePage probepage = deserialize(buff);
+            	if(probepage == null || Strings.isNullOrEmpty(probepage.getUrl())) {
+            		continue;
+            	}
                 if (probepage.getUrl().equalsIgnoreCase(md5url)) {
                     page = probepage;
                     break;
@@ -113,6 +117,9 @@ public class ProbeFileStorage {
         try {
         	tempFile.createNewFile();
         	List<ProbePage> list = reads();
+        	if(list == null || list.size() == 0) {
+        		return newProbePage;
+        	}
             // 2.2 将probe文件除了url相同的数据转存到临时文件中
             for (ProbePage pp : list) {
                 if (MD5Util.convert(url).equals(pp.getUrl())) {
@@ -191,7 +198,9 @@ public class ProbeFileStorage {
         try {
             Schema<ProbePage> schema = RuntimeSchema.getSchema(ProbePage.class);
             ProbePage probePage = schema.newMessage();
-            ProtostuffIOUtil.mergeFrom(data, probePage, schema);
+            if(probePage != null && !Strings.isNullOrEmpty(probePage.getUrl())) {
+            	ProtostuffIOUtil.mergeFrom(data, probePage, schema);
+            }
             return probePage;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);

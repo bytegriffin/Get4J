@@ -159,14 +159,26 @@ public final class UrlAnalyzer {
     	if(Strings.isNullOrEmpty(select)){
     		return null;
     	}
-    	String content = null;
+    	String content = "";
         if (page.isHtmlContent()) {
             Document document = Jsoup.parse(page.getHtmlContent(), page.getUrl());
             Elements eles = document.select(select);
             content = eles.toString();
         } else if (page.isJsonContent()) {
             try {//Json中暂时只支持获取属性
-            	content = (String)JSONPath.read(page.getJsonContent(), select);
+            	Object obj = JSONPath.read(page.getJsonContent(), select);
+            	if(obj instanceof JSONArray) {
+            		JSONArray array = (JSONArray) obj;
+					for (int i = 0; i < array.size(); i++) {
+					    String json = array.getString(i);
+					    content += json;
+					    if(i != array.size()-1){
+					    	content += ",";
+					    }
+					}
+            	} else {
+            		content = (String) obj;
+            	}
             } catch (Exception e) {
             	EmailSender.sendMail(e);
                 ExceptionCatcher.addException(page.getSeedName(), e);
