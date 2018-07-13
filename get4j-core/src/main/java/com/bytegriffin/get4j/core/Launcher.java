@@ -207,7 +207,8 @@ public class Launcher extends TimerTask implements Command {
 	}
 
 	/**
-	 * 初始化UrlQueue
+	 * 根据分页来初始化UrlQueue
+	 * 暂时只支持部分分页
 	 *
 	 * @param seed Seed
 	 */
