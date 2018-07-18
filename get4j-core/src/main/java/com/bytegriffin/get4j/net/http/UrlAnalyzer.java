@@ -77,7 +77,7 @@ public final class UrlAnalyzer {
      */
     public static String getTitle(String html) {
         Document document = Jsoup.parse(html);
-        return document.title();
+        return new String(document.title().getBytes());
     }
 
     /**
@@ -120,7 +120,7 @@ public final class UrlAnalyzer {
             } catch (Exception e) {
             	EmailSender.sendMail(e);
                 ExceptionCatcher.addException(page.getSeedName(), e);
-                logger.error("种子[" + page.getSeedName() + "]在使用Jsonpath[" + select + "]定位解析Json字符串时出错，", e);
+                logger.error("种子[{}]在使用Jsonpath[{}]定位解析Json字符串时出错：{}", page.getSeedName(), select,e);
             }
         } else if (page.isXmlContent()) {
             Document doc = Jsoup.parse(page.getXmlContent(), "", Parser.xmlParser());
@@ -182,7 +182,7 @@ public final class UrlAnalyzer {
             } catch (Exception e) {
             	EmailSender.sendMail(e);
                 ExceptionCatcher.addException(page.getSeedName(), e);
-                logger.error("种子[" + page.getSeedName() + "]在使用Jsonpath[" + select + "]定位解析Json字符串时出错，", e);
+                logger.error("种子[{}]在使用Jsonpath[{}]定位解析Json字符串时出错：{}", page.getSeedName(), select,e);
             }
         } else if (page.isXmlContent()) {
             Document document = Jsoup.parse(page.getXmlContent(), "", Parser.xmlParser());
@@ -266,7 +266,7 @@ public final class UrlAnalyzer {
         } catch (URISyntaxException e) {
         	EmailSender.sendMail(e);
             ExceptionCatcher.addException(page.getSeedName(), e);
-            logger.error("线程[" + Thread.currentThread().getName() + "]嗅探种子[" + page.getSeedName() + "]在嗅探整站链接提取url前缀时出错：", e);
+            logger.error("线程[{}]嗅探种子[{}]在嗅探整站链接提取url前缀时出错：{}", Thread.currentThread().getName(), page.getSeedName(), e);
         }
         if (page.isHtmlContent()) {// html格式会启动jsoup抓取各种资源的src和href
             String content = page.getHtmlContent();
@@ -334,12 +334,16 @@ public final class UrlAnalyzer {
             		urls.add(jsonUrl + id);
             	}
             } else {
+            	if(detailSelect.contains(DefaultConfig.json_path_prefix)) {
+                    logger.warn("请检查页面链接选择器[{}]格式是否输入正确，Html页面格式不应该包含JsonPath，或者抓取的页面链接出错或发生跳转。", detailSelect);
+                    System.exit(1);
+            	}
             	Document doc = Jsoup.parse(content, siteUrl);
             	Elements eles = doc.select(detailSelect);// a标签
             	HashSet<String> href = getAllUrlByElement(eles);// a标签
                 urls.addAll(href); // 过滤<a>标签中的资源
             }
-            
+
         } else if (page.isJsonContent()) { // json格式：通过jsonpath来获取detail链接
             if (detailSelect.startsWith(DefaultConfig.json_path_prefix)) {// json字符串里的detail页面提供的是绝对路径
                 if (detailSelect.contains(DefaultConfig.fetch_detail_json_html_split)) { // 特殊情况：当Json属性中包含Html，并且Html中存在Detail Link时，之间用逗号隔开，所以需要jsonpath和jsoup两个解析
@@ -728,7 +732,6 @@ public final class UrlAnalyzer {
         return urls;
     }
 
-
     /**
      * 相对路径转换为绝对路径 <br>
      *
@@ -736,16 +739,19 @@ public final class UrlAnalyzer {
      * @param relativeUrl 类似 index.html 或者是 /pc/index.html <br>
      * @return : 类似 http://baoliao.cq.qq.com/pc/index.html
      */
-    private String getAbsoluteURL(String baseUrl, String relativeUrl) {
+    public String getAbsoluteURL(String baseUrl, String relativeUrl) {
         String path = null;
         try {
+        	if(Strings.isNullOrEmpty(relativeUrl)) {
+        		return baseUrl;
+        	}
             relativeUrl = URLDecoder.decode(relativeUrl, "UTF-8").split("\r\n")[0];
             URI base = new URI(baseUrl.trim());// 基本网页URI
             URI abs = base.resolve(relativeUrl.replace(" ", ""));
             URL absURL = abs.toURL();// 转成URL
             path = absURL.toString();
         } catch (Exception ex) {
-            logger.warn("转换相对路径时，发现了非法的url格式：[" + relativeUrl + "]。");
+            logger.warn("转换url地址时，发现了非法的url格式：[{}]。", relativeUrl);
             UrlQueue.newFailVisitedUrl(page.getSeedName(), relativeUrl);
             EmailSender.sendMail(ex);
             ExceptionCatcher.addException(page.getSeedName(), ex);

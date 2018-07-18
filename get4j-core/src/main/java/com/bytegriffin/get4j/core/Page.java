@@ -2,9 +2,12 @@ package com.bytegriffin.get4j.core;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,11 +26,11 @@ public class Page {
     /**
      * 数据库中主键
      */
-    private String id;
+    private @Nullable String id;
     /**
      * 抓取url所属的网站
      */
-    private String host;
+    private @Nullable String host;
     /**
      * 当前seed名称：对应于Seed，如果要抓取多个种子，请保证此名称唯一
      */
@@ -35,19 +38,19 @@ public class Page {
     /**
      * 当前页面title信息
      */
-    private String title;
+    private @Nullable String title;
     /**
      * 当前页面的html内容
      */
-    private String htmlContent;
+    private @Nullable String htmlContent;
     /**
      * 当前页面的json内容
      */
-    private String jsonContent;
+    private @Nullable String jsonContent;
     /**
      * 当前页面是xml内容
      */
-    private String xmlContent;
+    private @Nullable String xmlContent;
     /**
      * 当前页面的url
      */
@@ -59,40 +62,40 @@ public class Page {
     /**
      * post请求参数
      */
-    private Map<String, String> params;
+    private @Nullable Map<String, String> params;
     /**
      * 页面编码
      */
     private String charset;
     /**
-     * Response的cookie字符串
+     * Response的set-cookie字符串
      */
-    private String cookies;
+    private @Nullable String setCookies;
 
     /**
      * 当前页面中的资源文件：js、jpg、css等文件
      */
-    private LinkedHashSet<String> resources = Sets.newLinkedHashSet();
+    private @Nullable LinkedHashSet<String> resources = Sets.newLinkedHashSet();
     /**
      * 当前资源文件存储路径
      */
-    private String resourceSavePath;
+    private @Nullable String resourceSavePath;
     /**
      * 抓取时间
      */
-    private String fetchTime;
+    private @Nullable String fetchTime;
     /**
      * 当启动list_detail抓取模式时，每个详情页对应的avatar资源
      */
-    private String avatar;
+    private @Nullable String avatar;
     /**
      * 当启动list_detail抓取模式时，每个列表所对应的详情页
      */
-    private LinkedHashSet<String> detailLinks = Sets.newLinkedHashSet();
+    private @Nullable LinkedHashSet<String> detailLinks = Sets.newLinkedHashSet();
     /**
      * 自定义动态字段
      */
-    private Map<String, Object> fields = Maps.newHashMap();
+    private @Nullable Map<String, Object> fields = Maps.newHashMap();
     /**
      * 是否为列表页
      */
@@ -307,8 +310,8 @@ public class Page {
             flag = true;
         }
 
-        if (!(this.getCookies() == null ? dbPage.getCookies() == null
-                : this.getCookies().equals(dbPage.getCookies()))) {
+        if (!(this.getSetCookies() == null ? dbPage.getSetCookies() == null
+                : this.getSetCookies().equals(dbPage.getSetCookies()))) {
             flag = true;
         }
 
@@ -349,8 +352,8 @@ public class Page {
             flag = true;
         }
 
-        if (!(this.getCookies() == null ? dbPage.getCookies() == null
-                : this.getCookies().equals(dbPage.getCookies()))) {
+        if (!(this.getSetCookies() == null ? dbPage.getSetCookies() == null
+                : this.getSetCookies().equals(dbPage.getSetCookies()))) {
             flag = true;
         }
 
@@ -361,6 +364,13 @@ public class Page {
         return flag;
     }
 
+	public String getCharset() {
+        return Strings.isNullOrEmpty(charset)? Charset.defaultCharset().name() : charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
 
     public Map<String, Object> getFields() {
 		return fields;
@@ -482,21 +492,13 @@ public class Page {
         this.id = id;
     }
 
-    public String getCookies() {
-        return cookies;
-    }
+    public String getSetCookies() {
+		return setCookies;
+	}
 
-    public void setCookies(String cookies) {
-        this.cookies = cookies;
-    }
-
-    public String getCharset() {
-        return charset;
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
+	public void setSetCookies(String setCookies) {
+		this.setCookies = setCookies;
+	}
 
 	public String getMethod() {
 		return method;

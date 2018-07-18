@@ -1,5 +1,7 @@
 package com.bytegriffin.get4j.sample;
 
+import org.jsoup.select.Elements;
+
 import com.bytegriffin.get4j.Spider;
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.parse.PageParser;
@@ -14,8 +16,11 @@ public class Music163PageParser implements PageParser {
 		if(page.isListPage()) {
 			System.err.println("用户自定义专辑页面title："+page.getTitle()+" 地址："+page.getUrl());
 		} else {
-			String geming = page.jsoupHtml("span.txt > a");
-			System.err.println(geming);
+			System.err.print("专辑名称："+page.getTitle());
+			Elements eles = page.jsoup("ul.f-hide > li > a[href]");
+			eles.forEach(e -> {
+				System.err.println("歌曲名称："+e.text() +"  歌曲链接：http://music.163.com"+e.attr("href"));
+			});
 		}
 		
 	}

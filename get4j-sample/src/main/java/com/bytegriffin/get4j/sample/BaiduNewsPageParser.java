@@ -6,13 +6,12 @@ import com.bytegriffin.get4j.parse.PageParser;
 
 public class BaiduNewsPageParser implements PageParser {
 
-    @Override
-    public void parse(Page page) {
+	@Override public void parse(Page page) {
        System.err.println(page.getTitle() + "   " + page.getCharset() + "  " );
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.cascade().fetchUrl("http://news.baidu.com/##")
+        Spider.cascade().fetchUrl("http://news.baidu.com/")
                 .parser(BaiduNewsPageParser.class)
                 .thread(1).start();
     }

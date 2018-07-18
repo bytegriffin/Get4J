@@ -112,10 +112,10 @@ public class DBStorage implements Process {
         } else {
             sql += "" + null + ",";
         }
-        if (page.getCookies() == null) {
+        if (page.getSetCookies() == null) {
             sql += "" + null + ",";
         } else {
-            sql += "'" + page.getCookies() + "',";
+            sql += "'" + page.getSetCookies() + "',";
         }
         if (page.getResources().isEmpty()) {
             sql += "" + null + ",";
@@ -168,10 +168,10 @@ public class DBStorage implements Process {
                 e.printStackTrace();
             }
         }
-        if (page.getCookies() == null) {
+        if (page.getSetCookies() == null) {
             sql += "COOKIES=" + null + ",";
         } else {
-            sql += "COOKIES='" + page.getCookies() + "',";
+            sql += "COOKIES='" + page.getSetCookies() + "',";
         }
         String content = null;
         if (page.isHtmlContent()) {
@@ -238,7 +238,7 @@ public class DBStorage implements Process {
                     } else if ("AVATAR".equals(column)) {
                         rowData.setAvatar(obj == null ? null : obj.toString());
                     } else if ("COOKIES".equals(column)) {
-                        rowData.setCookies(obj == null ? null : obj.toString());
+                        rowData.setSetCookies(obj == null ? null : obj.toString());
                     } else if ("SEED_NAME".equals(column)) {
                         rowData.setSeedName(obj == null ? null : obj.toString());
                     } else if ("TITLE".equals(column)) {

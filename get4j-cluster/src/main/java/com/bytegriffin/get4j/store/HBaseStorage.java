@@ -105,8 +105,8 @@ public class HBaseStorage implements Process {
 				put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("AVATAR"), Bytes.toBytes(page.getAvatar()));
 			}
 			put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("FETCH_CONTENT"),	Bytes.toBytes(page.getContent()));
-			if(!Strings.isNullOrEmpty(page.getCookies())){
-				put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("COOKIES"), Bytes.toBytes(page.getCookies()));
+			if(!Strings.isNullOrEmpty(page.getSetCookies())){
+				put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("COOKIES"), Bytes.toBytes(page.getSetCookies()));
 			}
 			if(!page.getResources().isEmpty()){
 				put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("RESOURCES_URL"),	Bytes.toBytes(page.getResources().toString()));

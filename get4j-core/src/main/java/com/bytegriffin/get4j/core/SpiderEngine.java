@@ -21,9 +21,9 @@ import com.bytegriffin.get4j.fetch.DynamicFieldFetcher;
 import com.bytegriffin.get4j.fetch.ListDetailFetcher;
 import com.bytegriffin.get4j.fetch.SingleFetcher;
 import com.bytegriffin.get4j.fetch.SiteFetcher;
-import com.bytegriffin.get4j.net.http.HttpClientEngine;
 import com.bytegriffin.get4j.net.http.HttpEngine;
 import com.bytegriffin.get4j.net.http.HttpProxy;
+import com.bytegriffin.get4j.net.http.OkHttpClientEngine;
 import com.bytegriffin.get4j.net.http.SeleniumEngine;
 import com.bytegriffin.get4j.net.http.UrlAnalyzer;
 import com.bytegriffin.get4j.net.sync.FtpSyncer;
@@ -187,8 +187,8 @@ public final class SpiderEngine {
 			http = new SeleniumEngine();
 			logger.info("启用Selenium作为抓取引擎。");
 		} else {
-			http = new HttpClientEngine();
-			logger.info("启用HttpClient作为抓取引擎。");
+			http = new OkHttpClientEngine();
+			logger.info("启用OkHttpClient作为抓取引擎。");
 		}
 		// 1.初始化httpclient部分参数
 		http.init(seed);
@@ -205,6 +205,7 @@ public final class SpiderEngine {
 					logger.warn("Http代理[{}]测试失效。", httpProxy.toString());
 				}
 			});
+			
 			if (newList.size() == 0) {
 				logger.error("启动失败：种子[{}]测试Http代理全部失效，请重新配置。", seed.getSeedName());
 				System.exit(1);

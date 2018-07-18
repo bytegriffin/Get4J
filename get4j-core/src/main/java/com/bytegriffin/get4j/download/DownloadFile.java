@@ -3,6 +3,7 @@ package com.bytegriffin.get4j.download;
 import java.util.List;
 import java.util.Map;
 
+import com.bytegriffin.get4j.net.http.OkHttpClientEngine;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -47,52 +48,63 @@ public class DownloadFile {
 		return true;
 	}
 
-	public static void clear(String seedName) {
-		download_big_file_list.get(seedName).clear();
-	}
-
-	public static List<DownloadFile> get(String seedName) {
-		return download_big_file_list.get(seedName);
+	/**
+	 * 下载大文件
+	 * @param seedName
+	 */
+	public static void downloadBigFile(String seedName) {
+		if (isExist(seedName)) {
+			List<DownloadFile> downlist = download_big_file_list.get(seedName);
+			for (DownloadFile file : downlist) {
+				OkHttpClientEngine.downloadBigFile(seedName, file.getUrl(), file.getContentLength());
+			}
+			download_big_file_list.get(seedName).clear();
+		}
 	}
 
 	public String getFileName() {
 		return fileName;
 	}
 
-	public void setFileName(String fileName) {
+	public DownloadFile setFileName(String fileName) {
 		this.fileName = fileName;
+		return this;
 	}
 
 	public byte[] getContent() {
 		return content;
 	}
 
-	public void setContent(byte[] content) {
+	public DownloadFile setContent(byte[] content) {
 		this.content = content;
+		return this;
 	}
 
 	public long getContentLength() {
 		return contentLength;
 	}
 
-	public void setContentLength(long contentLength) {
+	public DownloadFile setContentLength(long contentLength) {
 		this.contentLength = contentLength;
+		return this;
+	}
+
+	public DownloadFile setSeedName(String seedName) {
+		this.seedName = seedName;
+		return this;
 	}
 
 	public String getSeedName() {
 		return seedName;
 	}
 
-	public void setSeedName(String seedName) {
-		this.seedName = seedName;
-	}
-
 	public String getUrl() {
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public DownloadFile setUrl(String url) {
 		this.url = url;
+		return this;
 	}
 
 }

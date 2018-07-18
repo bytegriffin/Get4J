@@ -1,22 +1,27 @@
 package com.bytegriffin.get4j.net.http;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,18 +29,33 @@ import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
+import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.core.ExceptionCatcher;
 import com.bytegriffin.get4j.core.Globals;
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.core.UrlQueue;
+import com.bytegriffin.get4j.download.DownloadFile;
+import com.bytegriffin.get4j.net.http.interceptor.GzipInterceptor;
+import com.bytegriffin.get4j.net.http.interceptor.LoggingInterceptor;
+import com.bytegriffin.get4j.net.http.interceptor.RedirectInterceptor;
+import com.bytegriffin.get4j.net.http.interceptor.RetryInterceptor;
 import com.bytegriffin.get4j.send.EmailSender;
 import com.bytegriffin.get4j.util.Sleep;
 import com.bytegriffin.get4j.util.StringUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
+import com.google.common.collect.Maps;
+
+import okhttp3.CacheControl;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * HttpEngine共有属性方法
@@ -53,16 +73,6 @@ public abstract class AbstractHttpEngine {
 	private static final Pattern KEY_WORDS = Pattern.compile(".*(\\.(刷新太过频繁|刷新太频繁|刷新频繁|频繁访问|访问频繁|访问太频繁|访问过于频繁))$");
 
 	/**
-	 * 是否在页面中发现此内容
-	 *
-	 * @param content    页面内容
-	 * @return boolean
-	 */
-	private boolean isFind(String content) {
-		return KEY_WORDS.matcher(content).find();
-	}
-
-	/**
 	 * 记录站点防止频繁抓取的页面链接<br>
 	 * 处理某些站点避免频繁请求而作出的页面警告，当然这些警告原本就是页面内容，不管如何都先记录下来<br>
 	 * 有的站点需要等待一段时间就可以访问正常；有的需要人工填写验证码，有的直接禁止ip访问等 <br>
@@ -74,22 +84,151 @@ public abstract class AbstractHttpEngine {
 	 * @param logger    logger
 	 */
 	void frequentAccesslog(String seedName, String url, String content, Logger logger) {
-		if (isFind(content)) {
-			logger.warn("线程[" + Thread.currentThread().getName() + "]种子[" + seedName + "]访问[" + url + "]时太过频繁。");
+		if (KEY_WORDS.matcher(content).find()) {
+			logger.error("线程[{}]种子[{}]访问[{}]时太过频繁。",Thread.currentThread().getName() ,seedName, url);
 		}
 	}
+	
+	// 连接超时，单位秒
+    private final static int conn_timeout = 30;
+    // 写超时，单位秒
+    private final static int write_timeout = 5;
+    // 读超时，单位秒
+    private final static int read_timeout = 5;
+    
+	 /**
+     * 初始化OKHttpClientBuilder
+     * @param seedName
+     */
+    OkHttpClient.Builder initOkHttpClientBuilder(String seedName) {
+    	OkHttpClient.Builder builder = new OkHttpClient.Builder()
+            .connectTimeout(conn_timeout, TimeUnit.SECONDS)
+            .writeTimeout(write_timeout, TimeUnit.SECONDS)
+            .readTimeout(read_timeout, TimeUnit.SECONDS)
+            .followRedirects(false) //禁止okhttp的重定向操作，自己处理重定向
+            .followSslRedirects(false)
+            .cookieJar(new CustomCookieJar()) //设置自动携带Cookie
+            .retryOnConnectionFailure(true)  //允许失败重试
+            .addInterceptor(new RetryInterceptor())
+            .addInterceptor(new GzipInterceptor())
+            .addInterceptor(new RedirectInterceptor())
+            .addInterceptor(new LoggingInterceptor())
+            .cookieJar(new CustomCookieJar())
+            .sslSocketFactory(createSSLSocketFactory(),new TrustAllManager())
+            .hostnameVerifier(new TrustAllHostnameVerifier());
+    	Globals.OK_HTTP_CLIENT_BUILDER_CACHE.put(seedName, builder);
+    	return builder;
+    }
+    
+    /**
+     * CookieJar是用于保存Cookie的
+     */
+    private class CustomCookieJar implements CookieJar {
+	    // cookie 保存  key:host value:List<Cookie>
+	    private final LinkedHashMap<String, List<Cookie>> cookieStore = Maps.newLinkedHashMap();
+
+		@Override public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
+            cookieStore.put(httpUrl.host(), list);
+        }
+
+        @Override public List<Cookie> loadForRequest(HttpUrl httpUrl) {
+            List<Cookie> cookies = cookieStore.get(httpUrl.host());
+            return cookies != null ? cookies : new ArrayList<Cookie>();
+        }
+	}
+
+    /**
+     * 实现一个X509TrustManager接口，用于绕过验证，不用修改里面的方法
+     */
+    private static class TrustAllManager implements X509TrustManager {
+        @Override public void checkClientTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+
+        @Override public void checkServerTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+
+        @Override public X509Certificate[] getAcceptedIssuers() {
+        	return new X509Certificate[0];
+        }
+    }
+
+    /**
+     * 创建SSL工厂
+     *
+     * @return SSLContext
+     */
+    private static SSLSocketFactory createSSLSocketFactory() {
+        SSLSocketFactory sslSocketFactory = null;
+        try {
+        	SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, new TrustManager[]{new TrustAllManager()}, new SecureRandom());
+            sslSocketFactory = ctx.getSocketFactory();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sslSocketFactory;
+    }
+
+    /**
+     * 信任所有验证
+     */
+    private static class TrustAllHostnameVerifier implements HostnameVerifier {
+        @Override public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    }
+
+    /**
+     * 事先将大文件缓存起来
+     * @param seedName 种子名称
+     * @param url url
+     * @param contentLength 网页内容长度
+     * @return boolean
+     */
+    static boolean cacheBigFile(String seedName, String url, long contentLength){
+    	if (contentLength <= big_file_max_size) {//10M
+            return false;
+        }
+    	DownloadFile dfile = new DownloadFile();
+    	dfile.setSeedName(seedName).setUrl(url).setContentLength(contentLength);
+    	DownloadFile.add(seedName, dfile);
+    	return true;
+    }
 
 	/**
-	 * 转换页面内容： 将inputstream转换成string类型
-	 *
-	 * @param is   页面内容输入流
-	 * @param charset       编码
-	 * @return String
-	 * @throws IOException          ioException
-	 */
-	String getContentAsString(InputStream is, String charset) throws IOException {
-		return new String(ByteStreams.toByteArray(is), charset);
-	}
+     * 获取资源文件后缀名
+     * @param subType String
+     * @return String
+     */
+    static String getResourceSuffix(String subType) {
+    	String fileSuffix = "";
+    	switch(subType){
+        case "icon":
+        	fileSuffix = "ico";
+            break;
+        case "javascript":
+        	fileSuffix = "js";
+            break;
+        case "excel":
+        	fileSuffix = "xls";
+            break;
+        case "powerpoint":
+        	fileSuffix = "ppt";
+            break;
+        case "word":
+        	fileSuffix = "doc";
+            break;  
+        case "flash":
+        	fileSuffix = "swf";
+            break;    
+        default:
+        	fileSuffix = subType;
+            break;
+    	}
+        return fileSuffix;
+    }
 
 	//本方法暂时没用
 	//对url进行解码，否则就是类似这种格式：http://news.baidu.com/n?cmd=6&loc=0&name=%B1%B1%BE%A9
@@ -149,8 +288,7 @@ public abstract class AbstractHttpEngine {
 		String start = sleepRange.substring(0, sleepRange.indexOf(split));
 		String end = sleepRange.substring(sleepRange.lastIndexOf(split) + 1, sleepRange.length());
 		if (!StringUtil.isNumeric(start) || !StringUtil.isNumeric(end)) {
-			logger.error("线程[" + Thread.currentThread().getName() + "]检查种子[" + seed.getSeedName() + "]的间隔范围配置中["
-					+ sleepRange + "]不能出现字符串。");
+			logger.error("线程[{}]检查种子[{}]的间隔范围配置中[{}]不能出现字符串。",Thread.currentThread().getName(),seed.getSeedName(),sleepRange);
 			System.exit(1);
 		}
 		int min = Integer.valueOf(start);
@@ -190,53 +328,36 @@ public abstract class AbstractHttpEngine {
 	}
 
 	/**
-	 * 判断HttpClient下载是否为Json文件
-	 *
-	 * @param contentType    contentType
+	 * 判断是否为Json文件
+	 * @param mediaType MediaType
 	 * @return boolean
 	 */
-	static boolean isJsonPage(String contentType) {
-		return (contentType.contains("json") || contentType.contains("JSON") || contentType.contains("Json"));
+	static boolean isJsonPage(MediaType mediaType, String content) {
+		return (mediaType.subtype().contains("json") || content.startsWith("{") || content.startsWith("["));
 	}
 
 	/**
 	 * 判断是否为普通页面
 	 *
-	 * @param contentType       contentType
-	 * @return boolean
-	 */
-	static boolean isHtmlPage(String contentType) {
-		return (contentType.contains("text/html") || contentType.contains("text/plain"));
-	}
-
-	/**
-	 * 判断是否为xml文件 有的xml文件返回的ContentType也是text/html，但是根节点是<?xml ...>
-	 *
 	 * @param contentType    contentType
-	 * @param content  content
 	 * @return boolean
 	 */
-	static boolean isXmlPage(String contentType, String content) {
-		return (contentType.contains("xml") || content.contains("<?xml") || content.contains("<rss")
-				|| content.contains("<feed"));
+	static boolean isHtmlPage(MediaType mediaType) {
+		return (mediaType.subtype().contains("html") || mediaType.toString().contains("text/plain"));
 	}
 
 	/**
-	 * 设置页面host 可以将它当作request中header的host属性使用
-	 *
-	 * @param page     Page
-	 * @param logger  Logger
+	 * 判断是否为xml文件
+	 * 特殊情况：
+	 * 1.有的xml文件返回的ContentType也是text/html，但是根节点是<?xml ...>的xml内容文件
+	 * 2.如果rss的话，那么返回的值是rss+xml；有的返回wlwmanifest+xml
+	 * @param contentType String
+	 * @param content String
+	 * @return boolean
 	 */
-	void setHost(Page page, Logger logger) {
-		String host = "";
-		try {
-			URI uri = new URI(page.getUrl());
-			host = uri.getAuthority();
-		} catch (URISyntaxException e) {
-			logger.error("线程[" + Thread.currentThread().getName() + "]设置种子[" + page.getSeedName() + "]url["
-					+ page.getUrl() + "]的HOST属性时错误。", e);
-		}
-		page.setHost(host);
+	static boolean isXmlPage(MediaType mediaType, String content) {
+		return (mediaType.subtype().contains("xml") || content.contains("<?xml") || content.contains("<rss")
+				|| content.contains("<feed"));
 	}
 
 	/**
@@ -248,37 +369,37 @@ public abstract class AbstractHttpEngine {
 	 * 3.有时html页面中是这种形式：[meta charset="gb2312"]<br>
 	 * 4.如果都没有那只能返回utf-8
 	 *
-	 * @param contentType  contentType
-	 * @param content           转码前的content，有可能是乱码
+	 * @param MediaType  mediaType
+	 * @param content   转码前的content，有可能是乱码
 	 * @return String
 	 */
-	String getCharset(String contentType, String content) {
+	String getCharset(MediaType mediaType, String content) {
 		String charset = "";
-		if (contentType.contains("charset=")) {// 如果Response的Header中有 Content-Type:text/html;charset=utf-8直接获取
-			charset = contentType.split("charset=")[1];
+		if (mediaType != null && mediaType.charset() != null) {// 如果Response的Header中有 Content-Type:text/html;charset=utf-8直接获取
+			charset = mediaType.charset().name();
 		} else {// 但是有时Response的Header中只有 Content-Type:text/html;没有charset
-			if (isXmlPage(contentType, content)) { // 首先判断是不是xml文件
+			if (isXmlPage(mediaType, content)) { // 首先判断是不是xml文件
 				charset = getXmlCharset(content);
-			} else if (isHtmlPage(contentType)) {// 如果是html，可以用jsoup解析html页面上的meta元素
+			} else if (isHtmlPage(mediaType)) {// 如果是html，可以用jsoup解析html页面上的meta元素
 				charset = getHtmlCharset(content);
-			} else if (isJsonPage(contentType)) { // 如果是json，那么给他设置默认编码
+			} else if (isJsonPage(mediaType, content)) { // 如果是json，那么给他设置默认编码
 				charset = getJsonCharset();
 			}
 		}
 		return charset;
 	}
-	
+
 	String getXmlCharset(String content){
 		Document doc = Jsoup.parse(content, "", Parser.xmlParser());
 		Node root = doc.root();
 		Node node = root.childNode(0);
 		return node.attr("encoding");
 	}
-	
+
 	String getJsonCharset(){
 		return Charset.defaultCharset().name();
 	}
-	
+
 	String getHtmlCharset(String content){
 		String charset;
 		Document doc = Jsoup.parse(content);
@@ -302,22 +423,15 @@ public abstract class AbstractHttpEngine {
 	 * @param content   转码后的content
 	 * @param page   page
 	 */
-	void setContent(String contentType, String content, Page page) {
-		if (isHtmlPage(contentType)) {
-			// 注意：有两种特殊情况
-			// 1.有时text/plain这种文本格式里面放的是json字符串，并且是这个json字符串里的属性值却是html
-			// 2.有时text/html反应出来的是rss的xml格式
-			if (isXmlPage(contentType, content)) {
-				page.setXmlContent(content);
-			} else {
-				page.setHtmlContent(content);
-			}
+	void setContent(MediaType mediaType, String content, Page page) {
+		if (isJsonPage(mediaType, content)) {
+			page.setJsonContent(content);
+		} else if (isXmlPage(mediaType, content)) {
+			page.setXmlContent(content);
 			// json文件中一般不好嗅探title属性
 			page.setTitle(UrlAnalyzer.getTitle(content));
-		} else if (isJsonPage(contentType)) {
-			page.setJsonContent(content);
-		} else if (isXmlPage(contentType, content)) {
-			page.setXmlContent(content);
+		} else if (isHtmlPage(mediaType)) {
+			page.setHtmlContent(content);
 			// json文件中一般不好嗅探title属性
 			page.setTitle(UrlAnalyzer.getTitle(content));
 		} else { // 不是html也不是json，那么只能是resource的链接了，xml也是
@@ -325,35 +439,84 @@ public abstract class AbstractHttpEngine {
 		}
 	}
 
+    /**
+     * 设置Http Header缓存机制
+     * @return CacheControl
+     */
+    private static CacheControl buildCacheControl(){
+    	final CacheControl.Builder builder = new CacheControl.Builder();
+    	//builder.onlyIfCached();//只使用缓存
+    	return builder.noCache() //不使用缓存
+        	   .noStore() //不存储服务端response缓存
+        	   .noTransform() //禁止转码
+        	   .maxAge(10, TimeUnit.MILLISECONDS)  //指示客户机可以接收生存期不大于指定时间的响应
+        	   .maxStale(10, TimeUnit.SECONDS)  //指示客户机可以接收超出超时期间的响应消息
+        	   .minFresh(10, TimeUnit.SECONDS).build();  //指示客户机可以接收响应时间小于当前时间加上指定时间的响应
+    }
+    
+    /**
+	 * 设置页面host 可以将它当作request中header的host属性使用
+	 * 
+	 * @param Request.Builder builder
+	 * @param page     Page
+	 * @param logger  Logger
+	 */
+	void setHost(Request.Builder builder, Page page, Logger logger) {
+		String host = "";
+		try {
+			URI uri = new URI(page.getUrl());
+			host = uri.getAuthority();
+		} catch (URISyntaxException e) {
+			logger.error("线程[{}]设置种子[{}]url[{}]的Host属性时错误：{}",Thread.currentThread().getName(),page.getSeedName(), page.getUrl(), e);
+		}
+		page.setHost(host);
+		if(builder != null) {
+			builder.addHeader("Host", host);
+		}
+	}
+
+	/**
+	 * 设置http请求url和header
+	 * @param builder Request.Builder
+	 * @param page 页面
+	 * @return Request.Builder
+	 */
+	public static Request.Builder setUrlAndHeader(Request.Builder builder, String url){
+    	return builder.url(url).cacheControl(buildCacheControl()).addHeader("Accept", DefaultConfig.http_header_accept);
+	}
+
 	/**
 	 * 是否要继续访问 根据response返回的状态码判断是否继续访问，true：是；false：否
-	 *
-	 * @param statusCode  返回状态码
-	 * @param page   page对象
-	 * @param logger   logger日志
-	 * @param url    url
-	 * @return boolean
+	 * 
+	 * @param httpClient
+	 * @param page
+	 * @param request
+	 * @param response
+	 * @param logger
+	 * @return
 	 * @throws IOException
-	 * @throws ClientProtocolException
 	 */
-	@SuppressWarnings("resource")
-	static boolean isVisit(CloseableHttpClient httpClient, Page page, Object request, Object response, Logger logger)
-			throws ClientProtocolException, IOException {
+	static boolean isVisit(OkHttpClient httpClient, Page page, Request request, Response response, Logger logger)
+			throws IOException {
 		String url = page.getUrl();
 		String seedName = page.getSeedName();
-		int statusCode = 200;
-		if (response instanceof HttpResponse) {
-			HttpResponse newresponse = (HttpResponse) response;
-			statusCode = newresponse.getStatusLine().getStatusCode();
-		} 
-//		else if (response instanceof WebResponse) {
-//			WebResponse newresponse = (WebResponse) response;
-//			statusCode = newresponse.getStatusCode();
-//		}
-		// 404/403/500/503 ：此类url不会重复请求，直接把url记录下来以便查明情况
-		if (HttpStatus.SC_NOT_FOUND == statusCode || HttpStatus.SC_FORBIDDEN == statusCode
-				|| HttpStatus.SC_INTERNAL_SERVER_ERROR == statusCode
-				|| HttpStatus.SC_SERVICE_UNAVAILABLE == statusCode) {
+		int statusCode = response.code();
+		if (response.isRedirect()) {// 状态码为3xx：此类url是跳转链接，访问连接后获取Response中头信息的Location属性才是真实地址
+			String newUrl = request.url().toString();//RedirectInterceptor已经自动设置好新url了
+			if (Strings.isNullOrEmpty(newUrl)) {
+				logger.error("线程[{}]访问种子[{}]的url[{}]时发生[{}]错误并且跳转到新的url为空链接，即：header中的Location值为空值。", 
+						Thread.currentThread().getName(), seedName, url, statusCode);	
+				return false;
+			} else {
+				//newUrl = UrlAnalyzer.custom(page).getAbsoluteURL(url, newUrl); //有可能跳转的Url是相对路径，例如 /abc/123.html
+				page.setUrl(newUrl);//设置需要跳转的url
+				page.setMethod(request.method());//设置method方法
+				
+				logger.warn("线程[{}]访问种子[{}]的url[{}]时发生[{}]错误并且跳转到新的url[{}]上。", 
+						Thread.currentThread().getName(), seedName, url, statusCode, newUrl);
+			}
+			
+		} else if (!response.isSuccessful()) { // 状态码为4xx---5xx
 			UrlQueue.newFailVisitedUrl(page.getSeedName(), page.getUrl());
 			String msg = "线程["+Thread.currentThread().getName()+"]访问种子["+seedName+"]的url["+page.getUrl()+"]请求发送["+statusCode+"]错误。";
 			Preconditions.checkArgument(false, msg);
@@ -361,33 +524,8 @@ public abstract class AbstractHttpEngine {
 			EmailSender.sendMail(msg);
             ExceptionCatcher.addException(seedName, msg);
 			return false;
-		} else if (HttpStatus.SC_MOVED_PERMANENTLY == statusCode || HttpStatus.SC_MOVED_TEMPORARILY == statusCode
-				|| HttpStatus.SC_SEE_OTHER == statusCode || HttpStatus.SC_TEMPORARY_REDIRECT == statusCode) {
-			// 301/302/303/307：此类url是跳转链接，访问连接后获取Response中头信息的Location属性才是真实地址
-			if (response instanceof HttpResponse) {
-				HttpResponse newresponse = (HttpResponse) response;
-				Header responseHeader = newresponse.getFirstHeader("Location");
-				if (responseHeader != null && !Strings.isNullOrEmpty(responseHeader.getValue())) {
-					String newurl = responseHeader.getValue();
-					if (request instanceof HttpGet) {
-						HttpGet get = (HttpGet) request;
-						get.releaseConnection();
-						get = new HttpGet(newurl);
-						response = httpClient.execute(get);
-					} else if (request instanceof HttpPost) {
-						HttpPost post = (HttpPost) request;
-						post.releaseConnection();
-						post = new HttpPost(newurl);
-						response = httpClient.execute(post);
-					}
-					page.setUrl(newurl);
-				}
-				logger.warn("线程[{}]访问种子[{}]的url[{}]时发生[{}]错误并且跳转到新的url[{}]上。", Thread.currentThread().getName(), seedName, url,statusCode, page.getUrl());
-			}
-		} else if (HttpStatus.SC_OK != statusCode) {
-			logger.warn("线程[{}]访问种子[{}]的url[{}]时发生[{}]错误。", Thread.currentThread().getName(), seedName, url,statusCode);
 		}
 		return true;
 	}
-
+	
 }

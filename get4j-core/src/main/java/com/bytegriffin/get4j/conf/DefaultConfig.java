@@ -9,13 +9,6 @@ import com.bytegriffin.get4j.net.sync.Syncer;
  */
 public class DefaultConfig {
 
-	/**
-	 * 关闭httpclient中的日志，否则信息打印太多了。
-	 */
-	public static void closeHttpClientLog(){
-		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-	}
-	
     /**
      * 默认 等待probe master重新选举时间，单位：秒
      */
@@ -30,7 +23,7 @@ public class DefaultConfig {
      * 默认 线程数目
      */
     public static final int thread_count = 1;
-    
+
     /**
      * 默认 抓取延迟为0秒
      */
@@ -55,6 +48,14 @@ public class DefaultConfig {
     public static final String linux_chromedriver = System.getProperty("user.dir") + File.separator + "bin" + File.separator + "chromedriver";
     public static final String chromedriver_log = System.getProperty("user.dir") + File.separator + "log" + File.separator + "get4j.log";
     public static final String http_header_accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    
+    
+    /**
+     * mdiatype 需要和服务端保持一致
+     */
+    // public static final MediaType post_media_type = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+    
+
     
     /**
      * 默认 user agent 配置文件

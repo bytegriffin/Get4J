@@ -16,6 +16,11 @@ public final class DateUtil {
 	private static final Logger logger = LogManager.getLogger(DateUtil.class);
     public static final String yyyyMMddHHmmss = "yyyy-MM-dd HH:mm:ss";
 
+    /**
+     * 日期转换
+     * @param str 需要转换的字符串==>yyyy-MM-dd HH:mm:ss
+     * @return
+     */
     public static Date strToDate(String str) {
     	DateTimeFormatter format = DateTimeFormatter.ofPattern(yyyyMMddHHmmss);
         try {
@@ -30,8 +35,9 @@ public final class DateUtil {
         return null;
     }
 
-    /*
+    /**
      * 当前时间
+     * @return String
      */
     public static String getCurrentDate() {
     	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(yyyyMMddHHmmss);
@@ -41,7 +47,7 @@ public final class DateUtil {
     /**
      * 时间开销
      *
-     * @param startTime String
+     * @param startTime 开始时间
      * @return String
      */
     public static String getCostDate(String startTime) {

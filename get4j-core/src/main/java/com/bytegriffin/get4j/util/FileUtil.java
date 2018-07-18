@@ -96,18 +96,18 @@ public final class FileUtil {
 				if (array.length > 0) {
 					String[] front = array[0].split(":");
 					String[] end = array[1].split(":");
-					hp = new HttpProxy(front[0], front[1], end[0], end[1]);
+					hp = new HttpProxy(front[0], Integer.valueOf(front[1]), end[0], end[1]);
 				} else {
 					if (str.contains(":")) {
 						String[] front = str.split(":");
-						hp = new HttpProxy(front[0], front[1]);
+						hp = new HttpProxy(front[0], Integer.valueOf(front[1]));
 					} else {
 						hp = new HttpProxy(str);
 					}
 				}
 			} else if (str.contains(":")) {
 				String[] front = str.split(":");
-				hp = new HttpProxy(front[0], front[1]);
+				hp = new HttpProxy(front[0], Integer.valueOf(front[1]));
 			} else {
 				hp = new HttpProxy(str);
 			}
@@ -131,10 +131,10 @@ public final class FileUtil {
 			String[] array = proxyString.split("@");
 			String[] front = array[0].split(":");
 			String[] end = array[1].split(":");
-			hp = new HttpProxy(front[0], front[1], end[0], end[1]);
+			hp = new HttpProxy(front[0], Integer.valueOf(front[1]), end[0], end[1]);
 		} else if (proxyString.contains(":")) {
 			String[] front = proxyString.split(":");
-			hp = new HttpProxy(front[0], front[1]);
+			hp = new HttpProxy(front[0], Integer.valueOf(front[1]));
 		} else {
 			hp = new HttpProxy(proxyString);
 		}
@@ -418,11 +418,10 @@ public final class FileUtil {
 		}
 
 		// 判断动态url中没有后缀名的自动加上相应的后缀名，有的资源文件没有后缀名，比如css不用写后缀照样也能引用
-		// 注意：资源文件link[href]有时候是xml文件，例如：<link type="application/rss+xml"
-		// href="rss"/>
+		// 注意：资源文件link[href]有时候是xml文件，例如：<link type="application/rss+xml" href="rss"/>
 		// <link type="application/wlwmanifest+xml"
 		// href="wlwmanifest.xml"/>，所以要判断xml后缀
-		if (!FetchResourceSelector.isFindResources(newUrl)) {
+		if (!FetchResourceSelector.isFindResources(newUrl) && !Strings.isNullOrEmpty(suffix)) {
 			newUrl += "." + suffix;
 		}
 

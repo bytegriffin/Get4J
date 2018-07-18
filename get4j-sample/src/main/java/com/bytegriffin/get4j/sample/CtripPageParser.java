@@ -15,7 +15,7 @@ public class CtripPageParser implements PageParser {
     }
 
     /**
-     * Json数据中包含html属性
+     * Json数据中包含html标签
      * @param args
      * @throws Exception
      */

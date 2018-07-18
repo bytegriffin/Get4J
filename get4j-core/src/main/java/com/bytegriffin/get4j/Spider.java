@@ -57,7 +57,6 @@ public class Spider {
     private Map<String, String> dynamicFieldMap;
 
     private Spider() {
-    	DefaultConfig.closeHttpClientLog();
     	dynamicFieldMap = Maps.newHashMap();
     	seed = new Seed();
         resourceSync = new ResourceSync();
@@ -66,7 +65,6 @@ public class Spider {
     }
 
     private Spider(PageMode pageMode) {
-    	DefaultConfig.closeHttpClientLog();
     	dynamicFieldMap = Maps.newHashMap();
     	seed = new Seed();
         resourceSync = new ResourceSync();
@@ -658,7 +656,6 @@ public class Spider {
      * @throws Exception 异常
      */
     public static Spider annotation(Class<? extends PageParser> clazz) throws Exception {
-    	DefaultConfig.closeHttpClientLog();
         me = new Spider();
         return me.getAnnotation(clazz);
     }
@@ -865,7 +862,6 @@ public class Spider {
      * 可以直接调用defaultProxy方法即可
      */
     public static void initFreeProxy() {
-    	DefaultConfig.closeHttpClientLog();
         Seed xicidaili = new Seed("xicidaili");
         xicidaili.setPageMode(PageMode.list_detail);
         xicidaili.setFetchUrl("http://www.xicidaili.com/nn/{1}");
@@ -883,7 +879,6 @@ public class Spider {
      * @param args 命令行参数
      */
     public static void main(String... args) {
-    	DefaultConfig.closeHttpClientLog();
         Context context = new Context(new CoreSeedsXmlHandler());
         List<Seed> seeds = context.load();
 

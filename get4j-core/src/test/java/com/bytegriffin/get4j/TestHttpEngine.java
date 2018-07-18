@@ -5,15 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.Consts;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,13 +18,18 @@ import org.openqa.selenium.remote.CapabilityType;
 
 import com.bytegriffin.get4j.conf.DefaultConfig;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 /**
  * 测试HttpClient与HttpUnit在实际状态下的抓取结果
  */
 public class TestHttpEngine {
 
-	private static String url = "http://tousu.baidu.com/news/add";
+	private static String url = "http://ifeve.com/wp-content/themes/flat/style.css";
 
 	/**
 	 * 注意：Jsoup在选择多个class时，中间的空格用点替代
@@ -42,43 +39,21 @@ public class TestHttpEngine {
 	public static void parse(String cotent) {
 		Document doc = Jsoup.parse(cotent);
 		Elements eles = doc.select("div._5pcb");
-		System.err.println(eles.html());
+		System.err.println(doc.html());
 		for (Element e : eles) {
 			String link = e.attr("href");
 			System.err.println(link);
 		}
 	}
 
-	public static void httpclient() throws ClientProtocolException, IOException {
-		long start = System.currentTimeMillis();
-		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-		RequestConfig requestConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();// 标准Cookie策略
-
-		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
-		// 发送get请求
-		HttpGet request = new HttpGet(url);
-		// List <NameValuePair> params = new ArrayList<NameValuePair>();
-		// params.add(new BasicNameValuePair("pageindex", "1"));
-		// params.add(new BasicNameValuePair("pagesize", "5"));
-		// params.add(new BasicNameValuePair("RepaymentTypeId", "0"));
-		// params.add(new BasicNameValuePair("type", "6"));
-		// params.add(new BasicNameValuePair("status", "1"));
-		// params.add(new BasicNameValuePair("orderby", "0"));
-		// params.add(new BasicNameValuePair("beginDeadLine","0"));
-		// params.add(new BasicNameValuePair("endDeadLine","0"));
-		// params.add(new BasicNameValuePair("rate","0"));
-		// params.add(new BasicNameValuePair("beginRate","0"));
-		// params.add(new BasicNameValuePair("endRate","0"));
-		// params.add(new BasicNameValuePair("orderby","0"));
-		// params.add(new BasicNameValuePair("Cmd","GetInvest_List"));
-		//
-		// request.setEntity(new UrlEncodedFormEntity(params));
-		HttpResponse response = client.execute(request);
-		long end = System.currentTimeMillis();
-		long aaa = end - start;
-		String content = EntityUtils.toString(response.getEntity(), Consts.UTF_8);
-		parse(content);
-		System.err.println(aaa + " " + response.getStatusLine().getStatusCode());
+	public static void okhttp() throws IOException {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        OkHttpClient client = clientBuilder.build();
+        Request request = new Request.Builder().url(url).build();
+        Response response = client.newCall(request).execute();
+        MediaType mediaType = response.body().contentType();
+        System.out.print(mediaType.type()+"==="+mediaType.subtype());
+		parse(response.body().string());
 	}
 
 	public static void selenium() throws Exception {
@@ -122,10 +97,8 @@ public class TestHttpEngine {
 //	    Iterator iterator=cookies.iterator();
 //	    while (iterator.hasNext()){
 //	        System.out.println(iterator.next().toString());
-//	    }
-		
+//	    }		
 
-		
 		String content = driver.getPageSource();
 		parse(content);
 		System.out.println("======================: " +content);
@@ -134,7 +107,7 @@ public class TestHttpEngine {
 
 	public static void main(String... args) throws Exception {
 		// testunit();
-		// httpclient();
-		selenium();
+		 okhttp();
+		// selenium();
 	}
 }

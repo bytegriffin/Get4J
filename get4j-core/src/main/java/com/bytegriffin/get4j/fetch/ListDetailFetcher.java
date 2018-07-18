@@ -95,7 +95,7 @@ public class ListDetailFetcher implements Process {
             page.setTitle(detailPage.getTitle());
             page.setAvatar(detailPage.getAvatar());
             page.setCharset(detailPage.getCharset());
-            page.setCookies(detailPage.getCookies());
+            page.setSetCookies(detailPage.getSetCookies());
             page.setFetchTime(DateUtil.getCurrentDate());
             page.setHtmlContent(detailPage.getHtmlContent());
             page.setJsonContent(detailPage.getJsonContent());

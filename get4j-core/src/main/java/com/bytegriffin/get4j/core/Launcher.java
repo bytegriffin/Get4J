@@ -17,8 +17,6 @@ import com.alibaba.fastjson.JSONPath;
 import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.conf.Seed;
 import com.bytegriffin.get4j.monitor.HealthChecker;
-import com.bytegriffin.get4j.net.http.HttpClientEngine;
-import com.bytegriffin.get4j.net.http.HttpEngine;
 import com.bytegriffin.get4j.net.http.UrlAnalyzer;
 import com.bytegriffin.get4j.net.sync.BatchScheduler;
 import com.bytegriffin.get4j.net.sync.RsyncSyncer;
@@ -66,8 +64,7 @@ public class Launcher extends TimerTask implements Command {
 		return condition;
 	}
 
-	@Override
-	public void run() {
+	@Override public void run() {
 		while (!condition) {
 			logger.info("种子[{}]已停止工作...", seed.getSeedName() );
 			try {
@@ -122,11 +119,6 @@ public class Launcher extends TimerTask implements Command {
 		// dump坏链
 		FailUrlStorage.dump();
 
-		// 关闭闲置链接，以便下一次多线程调用，减少服务器tcp链接数量，因此要重新初始化
-		HttpEngine he = Globals.HTTP_ENGINE_CACHE.get(seed.getSeedName());
-		if (he instanceof HttpClientEngine) {
-			HttpClientEngine.closeIdleConnection();
-		}
 		// 关闭资源同步器
 		if (DefaultConfig.resource_synchronizer != null) {
 			while (BatchScheduler.resources.size() > 0) {
@@ -147,14 +139,14 @@ public class Launcher extends TimerTask implements Command {
 		clearVisitedUrlQueue(seed.getSeedName());
 		// 清空异常信息
 		ExceptionCatcher.clearExceptions();
-		 idle();
+		// 设置为闲置状态
+		idle();
 	}
 
 	/**
-	 * 未开始或已爬取完成
+	 * 设置为闲置状态：未开始或已爬取完成
 	 */
-	@Override
-	public void idle() {
+	@Override public void idle() {
 		if(workerStatusOpt != null){
 			workerStatusOpt.setIdleStatus(seed.getSeedName());
 		}
@@ -164,8 +156,7 @@ public class Launcher extends TimerTask implements Command {
 	/**
 	 * 正在爬取工作
 	 */
-	@Override
-	public void begin() {
+	@Override public void begin() {
 		//设置每次抓取开始时间，以便JMX统计每次抓取的开销时间
 		Globals.PER_START_TIME_CACHE.put(seed.getSeedName(), DateUtil.getCurrentDate());
 		if(workerStatusOpt != null){
@@ -177,8 +168,7 @@ public class Launcher extends TimerTask implements Command {
 	/**
 	 * 继续工作
 	 */
-	@Override
-	public void continues() {
+	@Override public void continues() {
 		condition = true;
 		synchronized (this) {
 			this.notify();
@@ -189,8 +179,7 @@ public class Launcher extends TimerTask implements Command {
 	/**
 	 * 销毁工作
 	 */
-	@Override
-	public void destory() {
+	@Override public void destory() {
 		if (this.cancel()) {
 			Globals.LAUNCHER_CACHE.remove(seed.getSeedName());
 			logger.info("种子[{}]已被取消。",  seed.getSeedName() );
@@ -200,8 +189,7 @@ public class Launcher extends TimerTask implements Command {
 	/**
 	 * 暂停工作
 	 */
-	@Override
-	public void pause() {
+	@Override public void pause() {
 		condition = false;
 		logger.info("种子[{}]已停止运行。",  seed.getSeedName() );
 	}

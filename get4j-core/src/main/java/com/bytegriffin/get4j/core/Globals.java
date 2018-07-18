@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.lucene.index.IndexWriter;
 import org.bson.Document;
 import org.openqa.selenium.WebDriver;
@@ -21,6 +20,8 @@ import com.bytegriffin.get4j.probe.PageChangeProber;
 import com.bytegriffin.get4j.send.EmailSender;
 import com.google.common.collect.Maps;
 import com.mongodb.client.MongoCollection;
+
+import okhttp3.OkHttpClient;
 
 /**
  * 全局变量：缓存供全局访问的变量
@@ -68,9 +69,9 @@ public final class Globals {
     public static final Map<String, SleepRandomSelector> FETCH_SLEEP_RANGE_CACHE = Maps.newHashMap();
 
     /**
-     * 全局httpclientbuilder缓存 key:seed_name value: HttpClientBuilder
+     * 全局okhttpclientbuilder缓存 key:seed_name value: HttpClientBuilder
      */
-    public static final Map<String, HttpClientBuilder> HTTP_CLIENT_BUILDER_CACHE = Maps.newHashMap();
+    public static final Map<String, OkHttpClient.Builder> OK_HTTP_CLIENT_BUILDER_CACHE = Maps.newHashMap();
 
     /**
      * 全局download dir缓存 key:seed_name value: download dir

@@ -1,13 +1,11 @@
 package com.bytegriffin.get4j.net.http;
 
+import java.io.File;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Cookie;
@@ -42,16 +40,14 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
 	private static final int script_timeout = 10;
 	private static final int implicitly_wait = 10;// 隐式等待
 
-	@Override
-	public void init(Seed seed) {
-		
-		// 1.初始化DesiredCapabilities
-		DefaultConfig.closeHttpClientLog();
-
-		// 2.初始化参数
-		initParams(seed, logger);
-		logger.info("Seed[" + seed.getSeedName() + "]的Http引擎SeleniumEngine的初始化完成。");
-	}
+    @Override public void init(Seed seed) {
+        // 1.初始化OKHttpClientBuilder
+    	initOkHttpClientBuilder(seed.getSeedName());
+        
+        // 2.初始化配置参数
+        initParams(seed, logger);
+        logger.info("种子[{}]的Http引擎SeleniumEngine的初始化完成。", seed.getSeedName());
+    }
 
 	/**
 	 * 设置Chrome Driver参数
@@ -93,11 +89,20 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
 		if (osname.toLowerCase().contains("win")) {
 			chromedriver_path = DefaultConfig.win_chromedriver;
 		}
+		File chromedriverfile = Paths.get(chromedriver_path).toFile();
+		if(!chromedriverfile.exists()) {
+			logger.error("文件[{}]不存在。",chromedriver_path);
+			System.exit(1);
+		}
+		if(!chromedriverfile.canExecute()) {
+			logger.error("文件[{}]不可以执行。",chromedriver_path);
+			System.exit(1);
+		}
 		System.setProperty("webdriver.chrome.driver",  chromedriver_path);
 		ChromeDriverService service = new ChromeDriverService.Builder()
 				.withSilent(true)
 				.withLogFile(Paths.get(DefaultConfig.chromedriver_log).toFile())
-                .usingDriverExecutable(Paths.get(chromedriver_path).toFile())
+                .usingDriverExecutable(chromedriverfile)
                 .usingAnyFreePort()
                 .build();
 		WebDriver driver = new ChromeDriver(service, chromeOptions);
@@ -115,7 +120,7 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
     		ChromeOptions chromeOptions = newChromeOptions();
             setHttpProxy(page.getSeedName(), chromeOptions);
             setUserAgent(page.getSeedName(), chromeOptions);
-            setHost(page, logger);
+            setHost(null, page, logger);
             chromeOptions.setCapability("Host", page.getHost());
             chromeOptions.setCapability("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
             webDriver = newWebDriver(chromeOptions);
@@ -134,10 +139,10 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
 		proxy.setProxyType(Proxy.ProxyType.MANUAL);
 		proxy.setAutodetect(false);
 		String hostAndPort = httpProxy.getIp() + ":" + httpProxy.getPort();
-		if (httpProxy.getHttpHost() != null) {
+		if (httpProxy.getProxy() != null) {
 			proxy.setHttpProxy(hostAndPort).setSslProxy(hostAndPort);
 			proxy.setNoProxy("localhost");
-		}else if(httpProxy.getCredsProvider() != null){
+		}else if(httpProxy.getProxyAuthenticator() != null){
 			proxy.setSocksProxy(hostAndPort);
 			proxy.setSocksUsername(httpProxy.getUsername());
 			proxy.setSocksPassword(httpProxy.getPassword());
@@ -238,11 +243,8 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
 //    		});
             String content = webDriver.getPageSource();
             long contentlength = content.length();
-            if (contentlength > big_file_max_size) {//大于10m
-                HttpClientBuilder httpClientBuilder = HttpClients.custom().setConnectionManagerShared(true);
-                Globals.HTTP_CLIENT_BUILDER_CACHE.put(page.getSeedName(), httpClientBuilder);
-                boolean isdone = HttpClientEngine.cacheBigFile(page.getSeedName(), page.getUrl(), contentlength);
-                if (isdone) {
+            if (contentlength > big_file_max_size) {//大于10M
+                if (cacheBigFile(page.getSeedName(), page.getUrl(), contentlength)) {
                     return page;
                 }
             }
@@ -259,10 +261,7 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
             	page.setXmlContent(content);
             	page.setTitle(UrlAnalyzer.getTitle(content));
             } else { // 如果是资源文件的话
-            	HashSet<String> resources = page.getResources();
-                resources.add(page.getUrl());
-                HttpClientBuilder httpClientBuilder = HttpClients.custom().setConnectionManagerShared(true);
-                Globals.HTTP_CLIENT_BUILDER_CACHE.put(page.getSeedName(), httpClientBuilder);
+            	page.getResources().add(page.getUrl());
                 return page;
             }
 
@@ -275,7 +274,7 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
             //设置Response Cookie
             Set<Cookie> cookies = webDriver.manage().getCookies();
             String cookiesString = Joiner.on(";").join(cookies.toArray());
-            page.setCookies(cookiesString);
+            page.setSetCookies(cookiesString);
         } catch (Exception e) {
             UrlQueue.newUnVisitedLink(page.getSeedName(), page.getUrl());
             logger.error("线程[{}]种子[{}]获取链接[{}]内容失败。",  Thread.currentThread().getName() ,  page.getSeedName(), page.getUrl(),  e);
@@ -296,11 +295,11 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
  
             long contentlength = content.length();
             if (contentlength > big_file_max_size) {//大于10m
-            	 logger.warn("线程[" + Thread.currentThread().getName() + "]探测种子[" + page.getSeedName() + "]url[" + page.getUrl() + "]页面内容太大。");
+            	 logger.warn("线程[{}]探测种子[{}]url[{}]页面内容太大。",Thread.currentThread().getName(), page.getSeedName(), page.getUrl());
             }
 
             if (Strings.isNullOrEmpty(content)) {
-                logger.error("线程[" + Thread.currentThread().getName() + "]探测种子[" + page.getSeedName() + "]url[" + page.getUrl() + "]页面内容为空。");
+                logger.error("线程[{}]探测种子[{}]url[{}]页面内容为空。", Thread.currentThread().getName(), page.getSeedName(), page.getUrl());
                 return null;
             }
 
@@ -317,7 +316,7 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
 
             return content;
         } catch (Exception e) {
-            logger.error("线程[" + Thread.currentThread().getName() + "]探测种子[" + page.getSeedName() + "]url[" + page.getUrl() + "]内容失败。", e);
+            logger.error("线程[{}]探测种子[{}]url[{}]内容失败：{}", Thread.currentThread().getName(), page.getSeedName(), page.getUrl(), e);
             EmailSender.sendMail(e);
             ExceptionCatcher.addException(page.getSeedName(), e);
         }

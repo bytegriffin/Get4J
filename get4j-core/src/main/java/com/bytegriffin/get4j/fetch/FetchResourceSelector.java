@@ -40,10 +40,10 @@ public class FetchResourceSelector {
      * 资源文件后缀名
      */
     public static final Pattern BINARY_FILTERS = Pattern
-            .compile(".*(\\.(css|js|bmp|gif|jpe?g|png|ico|tiff?|svg|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf|mmf"
-                    + "|rm|rmvb|smil|wmv|swf|wma|7z|tar|zip|rar|gz|tgz|exe|asf|iso|3gp|mkv|flac|ape|dll|OCX|rtf|jar|au"
-                    + "|psd|lzh|pdf|dat|apk|ipa|epub|mobi|deb|sisx|cab|pxl|csv|doc|xls|ppt|pptx|msi|chm|torrent|docx|aif"
-                    + "|xlsx|xv|xvx|tp|tl|hqx|mdf|arj|txt|otf|ttf|woff|eot|so|bat|lib|ini|less|sass|scss))$");
+            .compile(".*(\\.(css|js|bmp|lbm|gif|jpe?g|png|ico|tiff?|svg|mid|mp2|mp3|mp4|wav|avi|mov|mpeg|ram|m4v|pdf|mmf"
+                    + "|rm|rmvb|smil|wmv|swf|wma|7z|tar|zip|rar|gz|tgz|exe|asf|iso|3gp|mkv|flac|ape|dll|OCX|rtf|jar|au|sea"
+                    + "|psd|lzh|pdf|dat|apk|ipa|epub|pub|mobi|deb|sisx|cab|pxl|csv|doc|xls|ppt|pptx|msi|chm|torrent|docx|aif"
+                    + "|xlsx|xv|xvx|tp|tl|hqx|mdf|arj|txt|otf|ttf|woff|eot|so|bat|bas|lib|ini|less|clp|sass|scss|vbs|sch))$");
 
     /**
      * 配置的resource选择字符串集合

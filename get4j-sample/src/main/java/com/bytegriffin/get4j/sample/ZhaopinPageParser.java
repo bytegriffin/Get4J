@@ -11,9 +11,14 @@ public class ZhaopinPageParser  implements PageParser {
        System.err.println(page.getTitle() + "   " + page.getUrl() );
     }
 
+    /**
+     * http链接自动跳转到https
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://sou.zhaopin.com/jobs/searchresult.ashx?jl=北京&p={1}").defaultUserAgent()
-        				.detailSelector("td.zwmc > div > a[href]").parser(ZhaopinPageParser.class).sleep(4).thread(1).start();
+        	.detailSelector("td.zwmc > div > a[href]").parser(ZhaopinPageParser.class).thread(1).start();
     }
 
 }

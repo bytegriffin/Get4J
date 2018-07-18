@@ -18,7 +18,7 @@ public class AmazonPageParser implements PageParser {
 
 	public static void main(String[] args) throws Exception {
 		Spider.list_detail().fetchUrl("https://www.amazon.cn/gp/bestsellers/books/ref=zg_bs_books_pg_1?ie=UTF8&pg={1}")
-				.detailSelector("a.a-link-normal[href]").parser(AmazonPageParser.class).thread(1).start();
+				.totalPages(2).detailSelector("a.a-link-normal[href]").parser(AmazonPageParser.class).thread(2).start();
 	}
 
 }

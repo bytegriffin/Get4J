@@ -1,12 +1,18 @@
 package com.bytegriffin.get4j.net.http;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
+import javax.annotation.Nullable;
 
 import com.google.common.base.Strings;
+
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 /**
  * Http代理
@@ -14,28 +20,47 @@ import com.google.common.base.Strings;
 public class HttpProxy {
 
     private String ip;
-    private String port;
-    private String username;
-    private String password;
-    private HttpHost httpHost;
-    private CredentialsProvider credsProvider;
+    private Integer port;
+    private @Nullable String username;
+    private @Nullable String password;
+    private Proxy proxy;
+    private Authenticator proxyAuthenticator;
 
+    /**
+     * 有的Http服务器配置了客户端认证，否则会在Http Header中显示 407 proxy unauthorized
+     * 例如：可以在Http Header的请求中配置“Authorization: Basic jdhaHY0=”
+     * 的参数，表示登录用户名/密码
+     * @return
+     */
+    private Authenticator newAuthenticator(String username, String password) {
+    	return new Authenticator() {
+            @Override
+            public Request authenticate(Route route, Response response) throws IOException {
+                String credential = Credentials.basic(username, password);
+                return response.request().newBuilder()
+                        .header("Authorization", credential).build();
+            }
+        };
+    }
+
+    private void newProxy() {
+    	this.proxy = new Proxy(Proxy.Type.HTTP,new InetSocketAddress(this.ip, this.port));
+    }
+
+    private void newProxyAuthenticate() {
+    	this.proxyAuthenticator = newAuthenticator(this.username, this.password);
+    }
+
+    /**
+     * 默认端口号为80
+     * @param ip
+     */
     public HttpProxy(String ip) {
         if (!Strings.isNullOrEmpty(ip)) {
             this.ip = ip.trim();
         }
-        this.port = "80";
-        this.httpHost = new HttpHost(this.ip, Integer.valueOf(this.port));
-    }
-
-    public HttpProxy(String ip, String port) {
-        if (!Strings.isNullOrEmpty(ip)) {
-            this.ip = ip.trim();
-        }
-        if (!Strings.isNullOrEmpty(port)) {
-            this.port = port.trim();
-        }
-        this.httpHost = new HttpHost(this.ip, Integer.valueOf(this.port));
+        this.port = 80;
+        newProxy();
     }
 
     public HttpProxy(String ip, Integer port) {
@@ -43,27 +68,17 @@ public class HttpProxy {
             this.ip = ip.trim();
         }
         if (port != null) {
-            this.port = String.valueOf(port);
+            this.port = port;
         }
-        this.httpHost = new HttpHost(this.ip, Integer.valueOf(this.port));
+        newProxy();
     }
 
-    public HttpProxy(String ip, String port, String schema) {
+    public HttpProxy(String ip, Integer port, String username, String password) {
         if (!Strings.isNullOrEmpty(ip)) {
             this.ip = ip.trim();
         }
-        if (!Strings.isNullOrEmpty(port)) {
-            this.port = port.trim();
-        }
-        this.httpHost = new HttpHost(this.ip, Integer.valueOf(this.port), schema);
-    }
-
-    public HttpProxy(String ip, String port, String username, String password) {
-        if (!Strings.isNullOrEmpty(ip)) {
-            this.ip = ip.trim();
-        }
-        if (!Strings.isNullOrEmpty(port)) {
-            this.port = port.trim();
+        if (port != null) {
+            this.port = port;
         }
         this.username = username.trim();
         if (Strings.isNullOrEmpty(password)) {
@@ -71,14 +86,12 @@ public class HttpProxy {
         } else {
             this.password = password.trim();
         }
-        this.httpHost = new HttpHost(this.ip, Integer.valueOf(this.port));
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(new AuthScope(this.ip, Integer.valueOf(this.port)), new UsernamePasswordCredentials(this.username, this.password));
-        this.credsProvider = credsProvider;
+        newProxy();
+        newProxyAuthenticate();
     }
 
     public String toString() {
-        String str = this.ip + ":" + this.port;
+        String str = this.ip + ":" + (this.port==null ? 80 : this.port);
         if (!Strings.isNullOrEmpty(this.username)) {
             str += "@" + this.username;
         }
@@ -118,7 +131,7 @@ public class HttpProxy {
         return ip;
     }
 
-    public String getPort() {
+    public Integer getPort() {
         return port;
     }
 
@@ -130,16 +143,12 @@ public class HttpProxy {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public Proxy getProxy() {
+        return proxy;
     }
 
-    public HttpHost getHttpHost() {
-        return httpHost;
-    }
-
-    public CredentialsProvider getCredsProvider() {
-        return credsProvider;
-    }
+	public Authenticator getProxyAuthenticator() {
+		return proxyAuthenticator;
+	}
 
 }

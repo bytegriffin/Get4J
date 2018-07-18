@@ -91,7 +91,7 @@ public class MongodbStorage implements Process {
     private Document buildDocument(Page page) {
         Document doc = new Document().append("SEED_NAME", page.getSeedName())
                 .append("TITLE", page.getTitle()).append("AVATAR", page.getAvatar())
-                .append("COOKIES", page.getCookies()).append("RESOURCES_URL", page.getResources())
+                .append("COOKIES", page.getSetCookies()).append("RESOURCES_URL", page.getResources())
                 .append("FETCH_TIME", page.getFetchTime());
         if (page.isHtmlContent()) {
             doc.append("FETCH_CONTENT", page.getHtmlContent());
@@ -118,7 +118,7 @@ public class MongodbStorage implements Process {
         Page dbpage = new Page();
         dbpage.setAvatar(doc.getString("AVATAR"));
         dbpage.setSeedName(doc.getString("SEED_NAME"));
-        dbpage.setCookies(doc.getString("COOKIES"));
+        dbpage.setSetCookies(doc.getString("COOKIES"));
         dbpage.setTitle(doc.getString("TITLE"));
         if (page.isHtmlContent()) {
             dbpage.setHtmlContent(doc.getString("FETCH_CONTENT"));

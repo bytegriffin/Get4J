@@ -14,7 +14,6 @@ import com.bytegriffin.get4j.conf.Configuration;
 import com.bytegriffin.get4j.conf.ConfigurationXmlHandler;
 import com.bytegriffin.get4j.conf.Context;
 import com.bytegriffin.get4j.conf.CoreSeedsXmlHandler;
-import com.bytegriffin.get4j.conf.DefaultConfig;
 import com.bytegriffin.get4j.conf.DynamicField;
 import com.bytegriffin.get4j.conf.DynamicFieldXmlHandler;
 import com.bytegriffin.get4j.conf.ResourceSync;
@@ -193,7 +192,6 @@ public class Cluster {
      * @param args String[]
      */
 	public static void main(String[] args) {
-		DefaultConfig.closeHttpClientLog();
 		Context context = new Context(new CoreSeedsXmlHandler());
 		List<Seed> seeds = context.load();
 

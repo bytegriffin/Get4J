@@ -13,7 +13,7 @@ import com.bytegriffin.get4j.core.Globals;
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.core.PageMode;
 import com.bytegriffin.get4j.core.Process;
-import com.bytegriffin.get4j.net.http.HttpClientEngine;
+import com.bytegriffin.get4j.net.http.OkHttpClientEngine;
 import com.bytegriffin.get4j.net.http.UrlAnalyzer;
 import com.bytegriffin.get4j.net.sync.BatchScheduler;
 import com.bytegriffin.get4j.util.FileUtil;
@@ -69,20 +69,20 @@ public class DiskDownloader implements Process {
 
         // 2.下载页面中的资源文件
         String folderName =  Globals.DOWNLOAD_DISK_DIR_CACHE.get(page.getSeedName());
-        List<DownloadFile> list = HttpClientEngine.downloadResources(page, folderName);
+        List<DownloadFile> list = OkHttpClientEngine.downloadResources(page, folderName);
         if(list != null && !list.isEmpty()) {
         	list.stream().filter(Objects::nonNull).forEach(file -> FileUtil.writeFileToDisk(file.getFileName(), file.getContent()));
         }
         //下载资源文件中的大文件
-        downloadBigFile(page.getSeedName());
+        DownloadFile.downloadBigFile(page.getSeedName());
 
         // 3.判断是否包含avatar资源，有的话就下载
         if (!Strings.isNullOrEmpty(page.getAvatar())) {
-        	DownloadFile downloadFile = HttpClientEngine.downloadAvatar(page, folderName);// 下载avatar资源
+        	DownloadFile downloadFile = OkHttpClientEngine.downloadAvatar(page, folderName);// 下载avatar资源
         	if(downloadFile != null){
         		FileUtil.writeFileToDisk(downloadFile.getFileName(), downloadFile.getContent());
         		 //下载大文件
-        		downloadBigFile(page.getSeedName());
+        		DownloadFile.downloadBigFile(page.getSeedName());
         		// 另开一个线程专门负责启用脚本同步avatar资源文件
                 if (DefaultConfig.sync_open) {
                     BatchScheduler.addResource(page.getSeedName(), page.getAvatar());
@@ -99,19 +99,5 @@ public class DiskDownloader implements Process {
         page.setResourceSavePath(Globals.DOWNLOAD_DISK_DIR_CACHE.get(page.getSeedName()));
         logger.info("线程[" + Thread.currentThread().getName() + "]下载种子[" + page.getSeedName() + "]的url[" + page.getUrl() + "]完成。");
     }
-    
-	/**
-	 * 下载大文件
-	 * @param seedName
-	 */
-	private void downloadBigFile(String seedName) {
-		if (DownloadFile.isExist(seedName)) {
-			List<DownloadFile> downlist = DownloadFile.get(seedName);
-			for (DownloadFile file : downlist) {
-				HttpClientEngine.downloadBigFile(seedName, file.getUrl(), file.getContentLength());
-			}
-			DownloadFile.clear(seedName);
-		}
-	}
 
 }

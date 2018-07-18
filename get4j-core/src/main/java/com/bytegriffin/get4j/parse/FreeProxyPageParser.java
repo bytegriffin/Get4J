@@ -25,7 +25,7 @@ public class FreeProxyPageParser implements PageParser {
             for (Element e : eles) {
                 String ip = e.select("td:eq(1)").text();
                 String port = e.select("td:eq(2)").text();
-                HttpProxy proxy = new HttpProxy(ip, port);
+                HttpProxy proxy = new HttpProxy(ip, Integer.valueOf(port));
                 proxys.add(proxy);
             }
             page.putField(xicidaili, proxys);
