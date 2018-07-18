@@ -52,7 +52,7 @@
 <dependency>
   <groupId>com.github.bytegriffin</groupId>
   <artifactId>get4j-core</artifactId>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 集群版:
@@ -61,7 +61,7 @@
 <dependency>
   <groupId>com.github.bytegriffin</groupId>
   <artifactId>get4j-cluster</artifactId>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 

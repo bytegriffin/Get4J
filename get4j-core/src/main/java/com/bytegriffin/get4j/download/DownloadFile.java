@@ -50,7 +50,7 @@ public class DownloadFile {
 
 	/**
 	 * 下载大文件
-	 * @param seedName
+	 * @param seedName String
 	 */
 	public static void downloadBigFile(String seedName) {
 		if (isExist(seedName)) {

@@ -16,8 +16,8 @@ public class CtripPageParser implements PageParser {
 
     /**
      * Json数据中包含html标签
-     * @param args
-     * @throws Exception
+     * @param args String
+     * @throws Exception Exception
      */
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://hotels.ctrip.com/Domestic/Tool/AjaxHotelList.aspx?cityId=1&page={1}")

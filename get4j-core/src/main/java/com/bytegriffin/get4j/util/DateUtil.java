@@ -18,8 +18,8 @@ public final class DateUtil {
 
     /**
      * 日期转换
-     * @param str 需要转换的字符串==>yyyy-MM-dd HH:mm:ss
-     * @return
+     * @param str 需要转换的字符串
+     * @return Date java.util.Date
      */
     public static Date strToDate(String str) {
     	DateTimeFormatter format = DateTimeFormatter.ofPattern(yyyyMMddHHmmss);

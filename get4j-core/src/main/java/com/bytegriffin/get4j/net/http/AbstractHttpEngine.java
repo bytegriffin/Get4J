@@ -478,7 +478,7 @@ public abstract class AbstractHttpEngine {
 	/**
 	 * 设置http请求url和header
 	 * @param builder Request.Builder
-	 * @param page 页面
+	 * @param url String
 	 * @return Request.Builder
 	 */
 	public static Request.Builder setUrlAndHeader(Request.Builder builder, String url){

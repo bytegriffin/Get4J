@@ -16,8 +16,8 @@ public class IteyePagePaser implements PageParser {
 
     /**
      * 自动跳转到一个相对路径的url
-     * @param args
-     * @throws Exception
+     * @param args String
+     * @throws Exception Exception
      */
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://www.iteye.com/ask")

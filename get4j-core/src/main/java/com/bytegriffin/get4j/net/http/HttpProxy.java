@@ -53,7 +53,7 @@ public class HttpProxy {
 
     /**
      * 默认端口号为80
-     * @param ip
+     * @param ip String
      */
     public HttpProxy(String ip) {
         if (!Strings.isNullOrEmpty(ip)) {

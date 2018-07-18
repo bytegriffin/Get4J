@@ -76,6 +76,10 @@ public class OkHttpClientEngine extends AbstractHttpEngine implements HttpEngine
 
     /**
      * 关闭和清理失效链接和过长链接
+     *
+     * @param client OkHttpClient
+     * @param request Request
+     * @param response Response
      */
     public static void closeConnection(OkHttpClient client, Request request, Response response) {
         if (client != null) {
@@ -116,6 +120,7 @@ public class OkHttpClientEngine extends AbstractHttpEngine implements HttpEngine
     /**
      * 设置User_Agent
      * @param seedName 种子名称
+     * @param requestBuilder Request.Builder
      */
     protected static void setUserAgent(String seedName, okhttp3.Request.Builder requestBuilder) {
         UserAgentSelector ual = Globals.USER_AGENT_CACHE.get(seedName);
