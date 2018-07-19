@@ -809,9 +809,13 @@ public final class UrlAnalyzer {
      */
     public static boolean isAcessListUrl(Page page){
     	List<String> listurls = Globals.LIST_URLS_CACHE.get(page.getSeedName());
-        if (listurls.contains(page.getUrl())) {
+        if(listurls == null) {
+        	 logger.warn("列表链接为空，请检查是否配置了正确的列表-详情页面模型：[{}]。");
+        	 return false;
+        } else if (listurls.contains(page.getUrl())) {
         	return true;
         }
+        logger.warn("列表链接中不包含url：[{}]。", page.getUrl());
         return false;
     }
 
