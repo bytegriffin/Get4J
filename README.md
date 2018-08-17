@@ -9,7 +9,7 @@
 * 支持单机、分布式两种部署模式
 * 支持定时、即时、监控页面变化的抓取模式
 * 支持JSoup、Jsonpath原生语法解析
-* 支持抓取部分页面中的Ajax、Javascript生成的数据
+* 基于Selenium抓取部分页面中的Ajax、Javascript生成的数据
 * 可配置User-Agent、代理，并随机选取进行访问
 * 支持将抓取的内容保存到不同的引擎中：Disk、Mysql、MongoDB、Lucene、HBase等
 * 支持JMX监控，实时检查各个服务节点/进程的健康状况，一旦发现问题会自动发Email通知管理员
