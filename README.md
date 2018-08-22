@@ -101,3 +101,6 @@ public class GithubPageParser {
 ```
 
 更多的抓取例子详见get4j-sample
+
+# License
+[Apache 2.0 License.](/LICENSE)
