@@ -100,7 +100,7 @@ public class GithubPageParser {
 }
 ```
 
-更多的抓取例子详见get4j-sample
+更多的抓取例子详见[get4j-sample](https://github.com/bytegriffin/Get4J/tree/master/get4j-sample/src/main/java/com/bytegriffin/get4j/sample)
 
 # License
 [Apache 2.0 License.](/LICENSE)
