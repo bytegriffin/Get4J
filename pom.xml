@@ -64,7 +64,7 @@
 		<javaxmail.version>1.6.1</javaxmail.version>
 		<guava.version>25.1-jre</guava.version>
 		<jedis.version>2.9.0</jedis.version>
-		<zookeeper.version>3.4.12</zookeeper.version>
+		<zookeeper.version>3.4.14</zookeeper.version>
 		<curator.version>4.0.1</curator.version>
 		<hbase.version>2.0.1</hbase.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
