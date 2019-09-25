@@ -56,7 +56,7 @@ public class Seed {
     /**
      * 当抓取模式fetch.mode为list_detail时为必填项，表示详情页面的url，其中可变的字符串要用大括号括起来。
      */
-    private String fetchDetailSelector;
+    private String fetchDetailLinkSelector;
     /**
      * 当抓取模式fetch.mode为list_detail时为必填项，表示列表总页数，可以是整数，
      * 也可以是selector字符串
@@ -210,7 +210,7 @@ public class Seed {
      * @return boolean
      */
     public boolean isListDetailMode() {
-        return (!Strings.isNullOrEmpty(this.fetchDetailSelector));
+        return (!Strings.isNullOrEmpty(this.fetchDetailLinkSelector));
     }
 
     /**
@@ -433,12 +433,12 @@ public class Seed {
         this.pageMode = pageMode;
     }
 
-    public String getFetchDetailSelector() {
-        return fetchDetailSelector;
+    public String getFetchDetailLinkSelector() {
+        return fetchDetailLinkSelector;
     }
 
-    public void setFetchDetailSelector(String fetchDetailSelector) {
-        this.fetchDetailSelector = fetchDetailSelector;
+    public void setFetchDetailLinkSelector(String fetchDetailLinkSelector) {
+        this.fetchDetailLinkSelector = fetchDetailLinkSelector;
     }
 
     public List<String> getFetchResourceSelectors() {

@@ -145,10 +145,10 @@ public class Cluster {
      * @param node ClusterNode
      * @return List
      */
-    private static List<Initializer>  buildInitializers(ClusterNode node){
+    private static List<Initializer> buildInitializers(ClusterNode node){
     	RedisStorage redis = null;
     	List<Initializer> inits = Lists.newArrayList();
-    	if(!Strings.isNullOrEmpty(node.getRedisMode()) && !Strings.isNullOrEmpty(node.getRedisAddress()) && !Strings.isNullOrEmpty(node.getRedisAuth())){
+    	if(!Strings.isNullOrEmpty(node.getRedisMode()) && !Strings.isNullOrEmpty(node.getRedisAddress())){
     		redis = new RedisStorage(node.getRedisMode(),node.getRedisAddress(),node.getRedisAuth());
     		inits.add(redis);
     	}

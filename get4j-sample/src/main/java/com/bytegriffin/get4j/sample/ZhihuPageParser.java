@@ -12,7 +12,7 @@ public class ZhihuPageParser  implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("https://www.zhihu.com/explore/recommendations").detailSelector("a.question_link[href]")
+        Spider.list_detail().fetchUrl("https://www.zhihu.com/explore").detailLinkSelector("a.ExploreSpecialCard-contentTitle[href]")
                 .parser(ZhihuPageParser.class).thread(1).start();
     }
 

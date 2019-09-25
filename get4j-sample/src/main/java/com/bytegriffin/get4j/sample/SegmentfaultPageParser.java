@@ -12,7 +12,7 @@ public class SegmentfaultPageParser implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("https://segmentfault.com/questions?page={1}").detailSelector("h2.title > a[href]")
+        Spider.list_detail().fetchUrl("https://segmentfault.com/questions?page={1}").detailLinkSelector("h2.title > a[href]")
                .parser(SegmentfaultPageParser.class).thread(1).start();
     }
 

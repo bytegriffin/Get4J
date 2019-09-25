@@ -17,8 +17,8 @@ public class ZhaopinPageParser  implements PageParser {
      * @throws Exception Exception
      */
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://sou.zhaopin.com/jobs/searchresult.ashx?jl=北京&p={1}").defaultUserAgent()
-        	.detailSelector("td.zwmc > div > a[href]").parser(ZhaopinPageParser.class).thread(1).start();
+        Spider.list_detail().fetchUrl("https://fe-api.zhaopin.com/c/i/sou?start=90&pageSize=10&cityId=530").defaultUserAgent()
+        	.detailLinkSelector("$.data.results.positionURL").parser(ZhaopinPageParser.class).thread(1).start();
     }
 
 }

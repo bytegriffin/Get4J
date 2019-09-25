@@ -52,7 +52,7 @@
 <dependency>
   <groupId>com.github.bytegriffin</groupId>
   <artifactId>get4j-core</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 集群版:
@@ -61,7 +61,7 @@
 <dependency>
   <groupId>com.github.bytegriffin</groupId>
   <artifactId>get4j-cluster</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
@@ -76,8 +76,8 @@ import com.bytegriffin.get4j.parse.PageParser;
 public class GithubPageParser implements PageParser {
     @Override
     public void parse(Page page) {
-    	 String content = page.jsoupText("div.readme");
-    	 System.err.println("Get4J内容: " + content );
+      String content = page.jsoupText("#readme");
+      System.err.println("Get4J内容: " + content );
     }
 
     public static void main(String[] args) throws Exception {
@@ -94,7 +94,7 @@ import com.bytegriffin.get4j.Spider;
 public class GithubPageParser {
 	public static void main(String[] args) throws Exception {
 		Spider.single().fetchUrl("https://github.com/bytegriffin/Get4J")
-		  .parser(page -> {System.err.println("Get4J内容: " + page.jsoupText("div.readme"));})
+		  .parser(page -> {System.err.println("Get4J内容: " + page.jsoupText("#readme"));})
 		  .thread(1).start();
 	}
 }

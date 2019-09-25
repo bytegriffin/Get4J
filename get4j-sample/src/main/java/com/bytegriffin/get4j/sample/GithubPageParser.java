@@ -8,7 +8,7 @@ public class GithubPageParser implements PageParser {
 
     @Override
     public void parse(Page page) {
-    	String content = page.jsoupText("div.readme");
+    	String content = page.jsoupText("#readme");
     	System.err.println("Get4J内容："+content);
     }
 

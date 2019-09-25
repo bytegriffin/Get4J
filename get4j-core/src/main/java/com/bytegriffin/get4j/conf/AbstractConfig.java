@@ -44,7 +44,7 @@ public abstract class AbstractConfig {
     protected static final String fetch_http_method = "fetch.http.method";
     protected static final String fetch_probe_selector = "fetch.probe.selector";
     protected static final String fetch_probe_sleep = "fetch.probe.sleep";
-    protected static final String fetch_detail_selector = "fetch.detail.selector";
+    protected static final String fetch_detailLink_selector = "fetch.detailLink.selector";
     protected static final String fetch_total_pages = "fetch.total.pages";
     protected static final String fetch_login_username = "fetch.login.username";
     protected static final String fetch_login_password = "fetch.login.password";

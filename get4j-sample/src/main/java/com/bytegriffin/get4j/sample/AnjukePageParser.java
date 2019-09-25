@@ -16,8 +16,8 @@ public class AnjukePageParser  implements PageParser {
 
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("https://bj.fang.anjuke.com/loupan/all/p1/")
-        		.detailSelector("a.lp-name[href]").parser(AnjukePageParser.class)
-                .thread(1).start();
+        		.detailLinkSelector("a.lp-name[href]").parser(AnjukePageParser.class)
+                .defaultUserAgent().thread(1).start();
     }
 
 }

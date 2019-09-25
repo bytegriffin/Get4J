@@ -57,7 +57,7 @@
             </description>
         </property>
         <property>
-            <name>fetch.detail.selector</name>
+            <name>fetch.detailLink.selector</name>
             <value></value>
             <description>
                 非必填项，详情页面链接选择器，当抓取模式fetch.mode设置为list_detail时使用，支持Jsoup原生的选择器（html或xml内容）或jsonpath（json内容）。

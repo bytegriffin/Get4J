@@ -15,7 +15,7 @@ public class DangdangPageParser  implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://bang.dangdang.com/books/bestsellers/1-{1}").detailSelector("div.name > a[href]")
+        Spider.list_detail().fetchUrl("http://bang.dangdang.com/books/bestsellers/1-{1}").detailLinkSelector("div.name > a[href]")
                 .parser(DangdangPageParser.class).thread(1).start();
     }
 

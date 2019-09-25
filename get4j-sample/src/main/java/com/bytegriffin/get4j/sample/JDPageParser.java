@@ -21,7 +21,7 @@ public class JDPageParser implements PageParser {
        
 		// 京东搜索列表
        Spider.list_detail().fetchUrl("http://search.jd.com/Search?keyword=T%E6%81%A4&enc=utf-8&qrst=1&rt=1&stop=1&vt=2&page=1&s=52&click=0")
-       		.detailSelector("li.gl-item>div.gl-i-wrap>div.p-name.p-name-type-2 > a[href]").parser(JDPageParser.class).thread(1).start();
+       		.detailLinkSelector("li.gl-item>div.gl-i-wrap>div.p-name.p-name-type-2 > a[href]").parser(JDPageParser.class).thread(1).start();
     }
 
 }

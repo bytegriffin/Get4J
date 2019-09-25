@@ -446,7 +446,10 @@ public final class UrlAnalyzer {
                 }
             }
         }
-        page.setResources(resources);
+        if(page != null) {
+        	page.setResources(resources);
+    	}
+        
     }
 
     /**
@@ -706,8 +709,11 @@ public final class UrlAnalyzer {
      * @return HashSet
      */
     public final HashSet<String> getAllUrlByElement(Elements elements) {
-        String url = page.getUrl();
         HashSet<String> urls = Sets.newHashSet();
+        if(page == null) {
+        	return urls;
+        }
+        String url = page.getUrl();
         for (Element link : elements) {
             //链接只考虑href 与 src 两种
             String source = link.toString().contains("href") ? "href" : "src";

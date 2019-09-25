@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -79,7 +80,7 @@ public class SeleniumEngine extends AbstractHttpEngine implements HttpEngine {
     	Map<String, Object> prefs = Maps.newHashMap();
 	    prefs.put("profile.default_content_setting_values.notifications", 2);
 	    chromeOptions.setExperimentalOption("prefs", prefs);
-    	    
+	    chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		return chromeOptions;
 	}
 

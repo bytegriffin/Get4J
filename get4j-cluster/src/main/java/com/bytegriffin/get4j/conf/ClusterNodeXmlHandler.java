@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import com.google.common.base.Strings;
+
 /**
  * cluster-node.xml配置文件处理类
  */
@@ -49,7 +51,12 @@ public class ClusterNodeXmlHandler extends AbstractConfig {
             String name = property.element(name_node).getStringValue();
             String value = property.element(value_node).getStringValue();
             if (name.equalsIgnoreCase(node_name)) {
-            	conf.setNodeName(value);
+            	if (!Strings.isNullOrEmpty(value)) {
+            		conf.setNodeName(value);
+            	} else {
+            		logger.error("xml配置文件[{}]中的[{}]属性的值不能为空。",cluster_node_xml_file,node_name);
+            		System.exit(1);
+            	}
             } else if (name.equalsIgnoreCase(redis_mode)) {
             	conf.setRedisMode(value);
             } else if (name.equalsIgnoreCase(redis_address)) {

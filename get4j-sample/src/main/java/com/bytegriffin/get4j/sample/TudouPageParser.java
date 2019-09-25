@@ -12,8 +12,8 @@ public class TudouPageParser implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://new.tudou.com/sec/推荐")
-        	.detailSelector("a.v-meta__title__link[href]").parser(TudouPageParser.class).thread(1).start();
+        Spider.list_detail().fetchUrl("https://new.tudou.com/sec/10016?spm=a2h28.8313475.top.dtab")
+        	.detailLinkSelector("div.td_pc-card > a[href]").parser(TudouPageParser.class).thread(1).start();
     }
 
 }

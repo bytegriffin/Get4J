@@ -15,7 +15,7 @@ public class QQNewsPageParser implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://news.qq.com/").detailSelector("a.linkto[href]")
+        Spider.list_detail().fetchUrl("http://news.qq.com/").detailLinkSelector("a[href]")
                 .parser(QQNewsPageParser.class)
                 .thread(1).start();
     }

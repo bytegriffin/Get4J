@@ -2,9 +2,7 @@ package com.bytegriffin.get4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
-
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,8 +13,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
-
-import com.bytegriffin.get4j.conf.DefaultConfig;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -60,8 +56,8 @@ public class TestHttpEngine {
 		System.setProperty("webdriver.chrome.driver",  "/opt/workspace/Get4J/get4j-sample/bin/chromedriver");
 		
 		ChromeDriverService service = new ChromeDriverService.Builder()
-				.withSilent(true)
-				.withLogFile(Paths.get(DefaultConfig.chromedriver_log).toFile())
+//				.withSilent(true)
+//				.withLogFile(Paths.get(DefaultConfig.chromedriver_log).toFile())
                 .usingDriverExecutable(new File("/opt/workspace/Get4J/get4j-sample/bin/chromedriver"))
                 .usingAnyFreePort()
                 .build();
@@ -78,11 +74,11 @@ public class TestHttpEngine {
     	//chromeOptions.setCapability("noSign", true);
     	//chromeOptions.setCapability("unicodeKeyboard", true);
     	chromeOptions.setCapability("newCommandTimeout", "60");
-    	
+
     	WebDriver driver = new ChromeDriver(service, chromeOptions);
     	
 		driver.manage().timeouts().implicitlyWait(50, TimeUnit.SECONDS);
-		driver.get("https://www.facebook.com/groups/CardanoCommunity");	
+		driver.get("https://www.weibo.com");	
 		//显示等待控制对象
 //	    WebDriverWait webDriverWait=new WebDriverWait(driver,10);
 //	    //等待输入框可用后输入账号密码
@@ -107,7 +103,7 @@ public class TestHttpEngine {
 
 	public static void main(String... args) throws Exception {
 		// testunit();
-		 okhttp();
-		// selenium();
+		// okhttp();
+		selenium();
 	}
 }

@@ -30,7 +30,7 @@ public class CoreSeedsXmlHandler extends AbstractConfig {
         try {
             seedNode = doc.getRootElement();
         } catch (NullPointerException e) {
-            logger.error("读取的xml配置文件[" + core_seeds_xml_file + "]内容为空。");
+            logger.error("读取的xml配置文件[{}]内容为空。",core_seeds_xml_file);
             System.exit(1);
         }
         List<Element> siteElements = seedNode.elements(seed_node);
@@ -42,12 +42,13 @@ public class CoreSeedsXmlHandler extends AbstractConfig {
             for (Element property : propertyElements) {
                 String name = property.element(name_node).getStringValue();
                 String value = property.element(value_node).getStringValue();
+                //配置文件中的seed.name必须要手工配置，API中可以不用写
                 if (name.equalsIgnoreCase(seed_name)) {
                 	if (!Strings.isNullOrEmpty(value)) {
-                		seed.setSeedName(name);
-                    	hashset.add(name);
+                		seed.setSeedName(value);
+                		hashset.add(name);
                 	} else {
-                		logger.error("xml配置文件[" + core_seeds_xml_file + "]中的Seed.Name属性的值不能为空。");
+                		logger.error("xml配置文件[{}]中的[{}]属性的值不能为空。",core_seeds_xml_file,seed_name);
                 		System.exit(1);
                 	}
                 }else if (name.equalsIgnoreCase(woker_thread_count)) {
@@ -62,8 +63,8 @@ public class CoreSeedsXmlHandler extends AbstractConfig {
                     seed.setFetchProbeSelector(value);
                 } else if (name.equalsIgnoreCase(fetch_probe_sleep)) {
                     seed.setFetchProbeSleep(value);
-                } else if (name.equalsIgnoreCase(fetch_detail_selector)) {
-                    seed.setFetchDetailSelector(value);
+                } else if (name.equalsIgnoreCase(fetch_detailLink_selector)) {
+                    seed.setFetchDetailLinkSelector(value);
                 } else if (name.equalsIgnoreCase(fetch_total_pages)) {
                     seed.setFetchTotalPages(value);
                 } else if (name.equalsIgnoreCase(fetch_login_username)) {
@@ -113,10 +114,10 @@ public class CoreSeedsXmlHandler extends AbstractConfig {
             seeds.add(seed);
         }
         if (hashset.size() < siteElements.size()) {
-            logger.error("xml配置文件[" + core_seeds_xml_file + "]中不能设置相同的Seed Name，请重新检查。");
+            logger.error("xml配置文件[{}]中不能设置相同的Seed Name，请重新检查。", core_seeds_xml_file);
             System.exit(1);
         }
-        logger.info("xml配置文件[" + core_seeds_xml_file + "]读取完成。");
+        logger.info("xml配置文件[{}]读取完成。",core_seeds_xml_file);
         return seeds;
     }
 

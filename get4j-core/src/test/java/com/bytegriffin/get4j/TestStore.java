@@ -7,6 +7,7 @@ import org.bson.Document;
 
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.store.DBStorage;
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
@@ -29,7 +30,7 @@ public class TestStore {
         config.setConnectionTestQuery("SELECT 1");
         HikariDataSource dataSource = new HikariDataSource(config);
         DBStorage dbs = new DBStorage();
-        Page page = new Page("seed1", "http://invest.ppdai.com/loan/info?id=38604623");
+        Page page = new Page("seed1", "https://invest.ppdai.com/loan/info/338997833");
         page.setHtmlContent("test");
         Page dbpage = dbs.readOne(dataSource, page);
         System.out.println(URLDecoder.decode(dbpage.getHtmlContent(), "UTF-8"));
@@ -63,16 +64,20 @@ public class TestStore {
             collection.createIndex(Indexes.ascending(index_field), indexOptions);
         }
         Document searchQuery = new Document();
-        searchQuery.append("fetch_url", "ddddd");
+        searchQuery.append("fetch_url", "newnewnew");
 
         Document findOne = collection.find(searchQuery).first();
-        if (findOne.isEmpty()) {
+        if (findOne==null || findOne.isEmpty()) {
             collection.insertOne(new Document().append("fetch_url", "newnewnew"));
         } else {
 
         }
-
-        collection.updateOne(searchQuery, new Document().append("fetch_url", "aaaa"));
+        
+        //修改的条件
+        BasicDBObject bson= new BasicDBObject("fetch_url", "aaa");
+        //修改后的值
+        BasicDBObject bson2 = new BasicDBObject("$set",  new BasicDBObject("fetch_url", "bbb"));
+        collection.updateOne(bson, bson2);
         System.out.println(collection.countDocuments());
     }
 

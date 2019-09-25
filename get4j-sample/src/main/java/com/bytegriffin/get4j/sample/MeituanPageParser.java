@@ -1,8 +1,11 @@
 package com.bytegriffin.get4j.sample;
 
+import java.util.List;
+
 import com.bytegriffin.get4j.Spider;
 import com.bytegriffin.get4j.core.Page;
 import com.bytegriffin.get4j.parse.PageParser;
+import com.google.common.base.Splitter;
 
 /**
  * 美团
@@ -11,20 +14,22 @@ public class MeituanPageParser implements PageParser {
 
     @Override
     public void parse(Page page) {
-       System.err.println(page.getTitle() + "   " + page.getUrl() );
+    	String ids = page.json("$.data.searchresult[*].poiid").replace("[", "").replace("]", "");
+    	String titles = page.json("$.data.searchresult[*].name").replace("[", "").replace("]", "");
+    	List<String> idList = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(ids);
+    	List<String> titleList = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(titles);
+    	for(int n=0; n<idList.size(); n++) {
+            System.err.println("标题："+titleList.get(n).replace("\"", "")+"   链接：https://hotel.meituan.com/"+idList.get(n)+".html" );
+    	}
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://bj.meituan.com/meishi/api/poi/getPoiList?cityName=北京"
-        		+ "&cateId=0&areaId=0&sort=&dinnerCountAttrId=&page=1&userId=&uuid=aceb826eb6e5443eb2a9.1531401169.1.0.0"
-        		+ "&platform=1&partner=126&originUrl=http%3A%2F%2Fbj.meituan.com%2Fmeishi%2F&riskLevel=1&optimusCode=1"
-        		+ "&_token=eJxtT11vgkAQ%2FC%2F3WiJ3gAV8E6%2FUzwCiKDY%2BcMepeFIFThCb%2FveeiX1o0mSTmd2Z2ex%2BgXKUgh6C0I"
-        		+ "ZQATUrQQ%2BgDuy8AgWISipdHVmmbeu6bhgKoH9nBuwqgJQRBr2PrmkqtmZuH4O57D%2BQrUEFQQtulV9uWFtFM2Q9XCNpAgch"
-        		+ "Lj1VJcdOzjJxTT479JyrkleHTJU3%2FK8Dmc8XMi%2BRPzF5ovjtZ%2FIVuaHK9p%2BSsXFzuhMkmns%2FcJiTrqcDPnd5GO"
-        		+ "9nVf%2B0dPCQboxBmF6I7w5vre%2BUN%2FyStfPBYuxXnMUXv24sHzN8OB42JEE5x82wDf3ZPYO6ptbrrrVLMlLzmAX1op1S"
-        		+ "Lz%2B%2FjSK64F4M5%2Bcod0hbmvdNFAas0AorOVP%2BTlq2L64TCIsoK7GFMq85vbllfjJdzIJQG6%2FiSYo8NmPC6y9XhT4d1"
-        		+ "CajCYkbY3dc2vioadO1GFb0HYsLZLa%2FutWhexUEmXu65svUAN8%2FxMCUqA%3D%3D")
-        		.detailSelector("http://www.meituan.com/meishi/$.data.poiInfos.poiId")
+        Spider.single().fetchUrl("https://ihotel.meituan.com/hbsearch/HotelSearch?utm_medium=pc&version_name=999.9&cateId=20&attr_28=129"
+        		+ "&uuid=F70F41EB5A441F4447F12F063A5E74716D665BD271897405435D7A9B691351B8%401569120759715"
+        		+ "&cityId=1&offset=40&limit=10&startDay=20190922&endDay=20190922&q=&sort=defaults"
+        		+ "&X-FOR-WITH=dmzz4Tt0X37QSkv0aBrMRdhm25ElRDngPWUlMwOm7eWq5jYjz6iu9uLTAWsalUhnkmTcHhyphn"
+        		+ "1WHQxE5CuOqa26XvDQyccqsGHAHwJ8TvlncVkMVdes62jk%2FSx6XGn7GkrezaBPXF4XpecHmT1Khg%3D%3D")
+        		//.detailSelector("https://hotel.meituan.com/$.data.searchresult[*].poiid")
         		.parser(MeituanPageParser.class).defaultUserAgent().thread(1).start();
     }
 

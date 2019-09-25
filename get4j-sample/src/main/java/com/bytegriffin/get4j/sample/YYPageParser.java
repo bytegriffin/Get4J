@@ -15,7 +15,7 @@ public class YYPageParser implements PageParser {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Spider.list_detail().fetchUrl("http://www.yy.com/music/").parser(YYPageParser.class).detailSelector("a.box[href]")
+		Spider.list_detail().fetchUrl("http://www.yy.com/music/").parser(YYPageParser.class).detailLinkSelector("a.box[href]")
 				.javascriptSupport(false).defaultUserAgent().thread(1).start();
 	}
 

@@ -22,7 +22,7 @@ public class HuxiuPageParser implements PageParser {
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("https://www.huxiu.com/v2_action/article_list?page={1}")
         		.parser(HuxiuPageParser.class).defaultUserAgent().post().sleep(3)
-                .defaultUserAgent().detailSelector("$.data|a.transition.msubstr-row2[href]")
+                .defaultUserAgent().detailLinkSelector("$.data|a.transition.msubstr-row2[href]")
                 .thread(1).start();
 
     }

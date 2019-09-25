@@ -12,7 +12,7 @@ public class DoubanPageParser implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("https://www.douban.com/explore/").detailSelector("div.title>a[href]").parser(DoubanPageParser.class)
+        Spider.list_detail().fetchUrl("https://www.douban.com/explore/").detailLinkSelector("div.title>a[href]").parser(DoubanPageParser.class)
                 .thread(1).start();
     }
 

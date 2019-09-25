@@ -19,8 +19,8 @@ public class ToutiaoPageParser implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("https://www.toutiao.com/api/pc/feed/?max_behot_time=1531379657&category=__all__&utm_source=toutiao&widen=1&tadrequire=false&as=A1B5CBA4C700FA9&cp=5B47702F5A894E1&_signature=gawk4xAX2vhxdNrxSlJWBoGsJP")
-        	.detailSelector("https://www.toutiao.com/$.data[*].source_url")
+        Spider.list_detail().fetchUrl("https://www.toutiao.com/api/pc/feed/?max_behot_time=1531379657&category=__all__&utm_source=toutiao&widen=1")
+        	.detailLinkSelector("https://www.toutiao.com/a$.data[*].group_id")
         	.defaultUserAgent().parser(ToutiaoPageParser.class).thread(1).start();
     }
 

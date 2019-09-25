@@ -28,7 +28,7 @@ public class Music163PageParser implements PageParser {
 	public static void main(String[] args) throws Exception {
 		// 此地址是iframe地址，不是外部显示的地址
 		Spider.list_detail().fetchUrl("http://music.163.com/discover/playlist/?order=hot&cat=全部&limit=35&offset=0")
-				.detailSelector("a.tit.f-thide.s-fc0[href]")
+				.detailLinkSelector("a.tit.f-thide.s-fc0[href]")
 				.parser(Music163PageParser.class).thread(1).start();
 	}
 

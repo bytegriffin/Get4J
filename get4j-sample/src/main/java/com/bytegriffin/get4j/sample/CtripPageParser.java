@@ -21,7 +21,7 @@ public class CtripPageParser implements PageParser {
      */
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://hotels.ctrip.com/Domestic/Tool/AjaxHotelList.aspx?cityId=1&page={1}")
-                .detailSelector("http://hotels.ctrip.com/$.hotelPositionJSON.url").parser(CtripPageParser.class)
+                .detailLinkSelector("http://hotels.ctrip.com/$.hotelPositionJSON.url").parser(CtripPageParser.class)
                 .thread(1).start();
     }
 

@@ -19,7 +19,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 
 /**
- * MongoDB 3 数据库存储器<br>
+ * MongoDB数据库存储器<br>
  * 增量式更新数据
  */
 public class MongodbStorage implements Process {
@@ -63,20 +63,20 @@ public class MongodbStorage implements Process {
     public void execute(Page page) {
         MongoCollection<Document> collection = Globals.MONGO_COLLECTION_CACHE.get(page.getSeedName());
         Document searchQuery = new Document();
-        searchQuery.append("FETCH_URL", page.getUrl());
+        searchQuery.append(index_field, page.getUrl());
 
         Document findOne = collection.find(searchQuery).first();
         if (findOne == null || findOne.isEmpty()) {
             Document doc = buildDocument(page);
             doc.append("CREATE_TIME", DateUtil.getCurrentDate())
-                    .append("FETCH_URL", page.getUrl()).append("SITE_HOST", page.getHost());
+                    .append(index_field, page.getUrl()).append("SITE_HOST", page.getHost());
             collection.insertOne(doc);
         } else {
             Page dbpage = getDatabasePage(page, findOne);
             if (page.isRequireUpdateNoEncoding(dbpage)) {
                 Document doc = buildDocument(page);
                 Document updateObject = doc.append("UPDATE_TIME", DateUtil.getCurrentDate());
-                collection.updateOne(Filters.eq("FETCH_URL", page.getUrl()), new Document("$set", updateObject));
+                collection.updateOne(Filters.eq(index_field, page.getUrl()), new Document("$set", updateObject));
             }
         }
         logger.info("线程[" + Thread.currentThread().getName() + "]保存种子[" + page.getSeedName() + "]url为[" + page.getUrl() + "]到MongoDB数据库中。");

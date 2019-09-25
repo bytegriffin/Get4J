@@ -21,7 +21,7 @@ public class IteyePagePaser implements PageParser {
      */
     public static void main(String[] args) throws Exception {
         Spider.list_detail().fetchUrl("http://www.iteye.com/ask")
-                .detailSelector("div.summary>h3>a[href]").parser(IteyePagePaser.class)
+                .detailLinkSelector("div.summary>h3>a[href]").parser(IteyePagePaser.class)
                 .thread(3).start();
     }
 

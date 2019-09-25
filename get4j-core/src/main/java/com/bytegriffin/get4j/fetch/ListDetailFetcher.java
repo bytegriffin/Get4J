@@ -36,7 +36,7 @@ public class ListDetailFetcher implements Process {
         http = Globals.HTTP_ENGINE_CACHE.get(seed.getSeedName());
 
         // 2.初始化detail页面选择器
-        String detailSelect = seed.getFetchDetailSelector();
+        String detailSelect = seed.getFetchDetailLinkSelector();
         if (!Strings.isNullOrEmpty(detailSelect)) {
             Globals.FETCH_DETAIL_SELECT_CACHE.put(seed.getSeedName(), detailSelect.replace(" ", ""));
         }
@@ -88,7 +88,7 @@ public class ListDetailFetcher implements Process {
                 }
             } else {
                 // 3.获取并设置详情页DetailPage的Resource属性
-                UrlAnalyzer.custom(detailPage).sniffAndSetResources();
+            	UrlAnalyzer.custom(detailPage).sniffAndSetResources();
             }
 
             // 4.将详情页面属性指定为传递对象，当Page类增加新属性后此段代码也需要更新

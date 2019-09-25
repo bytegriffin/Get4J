@@ -1,6 +1,5 @@
 package com.bytegriffin.get4j.store;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -17,7 +16,6 @@ import com.google.common.collect.Sets;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisCommands;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
@@ -35,9 +33,10 @@ public class RedisStorage extends Initializer {
 	private static final int default_port = 6379;
 
 	private static RedisStorage redisStorage;
-	private JedisPool jedisPool;
-	private ShardedJedisPool shardedJedisPool;
-	private Set<HostAndPort> clusterNodes;
+	
+	public static Jedis jedis;
+	public static ShardedJedis sharedJedis;
+	public static JedisCluster jedisCluster;
 
 	private String redisMode;
 	private String redisAddress;
@@ -52,12 +51,11 @@ public class RedisStorage extends Initializer {
 
 	@Override
 	public void init() {
-		if (Strings.isNullOrEmpty(redisMode) || Strings.isNullOrEmpty(redisAddress)
-				|| Strings.isNullOrEmpty(redisAuth)) {
-			logger.error("Cluster模式下的组件RedisStorage在初始化时参数为空。");
+		if (Strings.isNullOrEmpty(redisMode) || Strings.isNullOrEmpty(redisAddress)) {
+			logger.error("分布式环境下组件RedisStorage在初始化时参数为空。");
 			System.exit(1);
 		}
-		if ("one".equalsIgnoreCase(redisMode)) {
+		if ("standalone".equalsIgnoreCase(redisMode)) {
 			standalone(redisAddress, redisAuth);
 		} else if ("sharded".equalsIgnoreCase(redisMode)) {
 			sharded(redisAddress, redisAuth);
@@ -65,7 +63,7 @@ public class RedisStorage extends Initializer {
 			cluster(redisAddress, redisAuth);
 		}
 		UrlQueue.registerRedisQueue(new RedisQueue<String>());
-		logger.info("Cluster模式下的组件RedisStorage的初始化完成。");
+		logger.info("分布式环境下组件RedisStorage的初始化完成。");
 	}
 
 	private static JedisPoolConfig config() {
@@ -83,84 +81,11 @@ public class RedisStorage extends Initializer {
 	}
 
 	/**
-	 * jedis线程不安全，只能从pool中获取
-	 * @return JedisCommands
-	 */
-	public  static JedisCommands newJedis() {
-		return getConnection();
-	}
-	
-	/**
-	 * 关闭链接
-	 * @param jedis JedisCommands
-	 */
-	public static void close(JedisCommands jedis) {
-		if ("standalone".equalsIgnoreCase(redisStorage.redisMode)) {
-			Jedis one = (Jedis) jedis;
-			if(one != null){
-				one.close();
-			}
-		} else if ("sharded".equalsIgnoreCase(redisStorage.redisMode)) {
-			ShardedJedis sharedJedis = (ShardedJedis)jedis;
-			if(sharedJedis != null){
-				sharedJedis.close();
-			}
-		} else if ("cluster".equalsIgnoreCase(redisStorage.redisMode)) {
-			try {
-				JedisCluster  jedisCluster = (JedisCluster) jedis;
-				if(jedisCluster != null){
-					jedisCluster.close();
-				}
-			} catch (IOException e) {
-				logger.error("Cluster模式下的组件RedisStorage关闭链接失败。", e);
-			}
-		}
-	}
-
-	private synchronized static JedisCommands getConnection() {
-		JedisCommands jedis = null;
-		if ("standalone".equalsIgnoreCase(redisStorage.redisMode)) {
-			Jedis one = null;
-			try {
-				one = redisStorage.jedisPool.getResource();
-				jedis = one;
-			} catch (Exception e) {
-				logger.error("Cluster模式下的组件RedisStorage初始化链接失败。", e);
-				System.exit(1);
-			}
-		} else if ("sharded".equalsIgnoreCase(redisStorage.redisMode)) {
-			ShardedJedis sharedJedis = null;
-			try {
-				sharedJedis = redisStorage.shardedJedisPool.getResource();
-				jedis = sharedJedis;
-			} catch (Exception e) {
-				logger.error("Cluster模式下的组件RedisStorage初始化链接失败。", e);
-				System.exit(1);
-			}
-		} else if ("cluster".equalsIgnoreCase(redisStorage.redisMode)) {
-			JedisCluster  jedisCluster = null;
-			try {
-				if (Strings.isNullOrEmpty(redisStorage.redisAuth)) {
-					jedisCluster = new JedisCluster(redisStorage.clusterNodes, 2000, 2000, 5, config());
-				} else {
-					jedisCluster = new JedisCluster(redisStorage.clusterNodes, 2000, 2000, 5, redisStorage.redisAuth,
-							config());
-				}
-				jedis = jedisCluster;
-			} catch (Exception e) {
-				logger.error("Cluster模式下的组件RedisStorage初始化链接失败。", e);
-				System.exit(1);
-			} 
-		}
-		return jedis;
-	}
-
-	/**
 	 * 单机
 	 * @param address 地址
 	 * @param password 密码，可以为空
 	 */
-	public void standalone(String address, String password) {
+	private void standalone(String address, String password) {
 		String firstAddress = Splitter.on(host_split).trimResults().split(address).iterator().next();
 		List<String> list = Splitter.on(":").trimResults().splitToList(firstAddress);
 		String host = "";
@@ -172,13 +97,20 @@ public class RedisStorage extends Initializer {
 			host = Strings.isNullOrEmpty(list.get(0)) ? null : list.get(0);
 			port = Strings.isNullOrEmpty(list.get(1)) ? null : Integer.valueOf(list.get(1));
 		} else {
-			logger.error("Cluster模式下的组件RedisStorage在初始化时发现redis地址格式有问题：{}", address);
+			logger.error("分布式环境下组件RedisStorage在standalone模式下初始化时发现redis地址格式有问题：{}", address);
 			System.exit(1);
 		}
-		if (Strings.isNullOrEmpty(password)) {
-			jedisPool = new JedisPool(config(), host, port);
-		} else {
-			jedisPool = new JedisPool(config(), host, port, 2000, password);
+		JedisPool jedisPool = null;
+		try {
+			if (Strings.isNullOrEmpty(password)) {
+				jedisPool = new JedisPool(config(), host, port);
+			} else {
+				jedisPool = new JedisPool(config(), host, port, 2000, password);
+			}
+			jedis = jedisPool.getResource();
+		} catch (Exception e) {
+			logger.error("分布式环境下的组件RedisStorage在standalone模式下初始化链接失败。", e);
+			System.exit(1);
 		}
 	}
 
@@ -187,7 +119,7 @@ public class RedisStorage extends Initializer {
 	 * @param addresses 地址集合，用逗号隔开
 	 * @param password 密码，可以为空
 	 */
-	public void sharded(String addresses, String password) {
+	private void sharded(String addresses, String password) {
 		List<String> list = Splitter.on(host_split).trimResults().splitToList(addresses);
 		List<JedisShardInfo> shards = Lists.newArrayList();
 		for (String addr : list) {
@@ -207,11 +139,17 @@ public class RedisStorage extends Initializer {
 			}
 		}
 		if (shards == null || shards.isEmpty()) {
-			logger.error("Cluster模式下的组件RedisStorage在初始化时发现redis地址格式有问题。");
+			logger.error("分布式环境下组件RedisStorage在Sharded模式下初始化时发现redis地址格式有问题。");
 			System.exit(1);
 		}
-		shardedJedisPool = new ShardedJedisPool(config(), shards);
-
+		ShardedJedisPool shardedJedisPool = null;
+		try {
+			shardedJedisPool = new ShardedJedisPool(config(), shards);
+			sharedJedis = shardedJedisPool.getResource();
+		} catch (Exception e) {
+			logger.error("分布式环境下组件RedisStorage在Sharded模式下初始化链接失败。", e);
+			System.exit(1);
+		}
 	}
 
 	/**
@@ -219,9 +157,9 @@ public class RedisStorage extends Initializer {
 	 * @param addresses 地址集合，用逗号隔开
 	 * @param password 密码，可以为空
 	 */
-	public void cluster(String addresses, String password) {
+	private void cluster(String addresses, String password) {
 		List<String> list = Splitter.on(host_split).trimResults().splitToList(addresses);
-		clusterNodes = Sets.newHashSet();
+		Set<HostAndPort> clusterNodes = Sets.newHashSet();
 		for (String addr : list) {
 			List<String> hostAndPort = Splitter.on(":").trimResults().splitToList(addr);
 			if (hostAndPort.size() == 1) {
@@ -231,9 +169,21 @@ public class RedisStorage extends Initializer {
 			}
 		}
 		if (clusterNodes == null || clusterNodes.isEmpty()) {
-			logger.error("Cluster模式下的组件RedisStorage在初始化时发现redis地址格式有问题。");
+			logger.error("分布式环境下组件RedisStorage在Cluster模式下初始化时发现redis地址格式有问题。");
 			System.exit(1);
 		}
+
+		try {
+			if (Strings.isNullOrEmpty(redisStorage.redisAuth)) {
+				jedisCluster = new JedisCluster(clusterNodes, 2000, 2000, 5, config());
+			} else {
+				jedisCluster = new JedisCluster(clusterNodes, 2000, 2000, 5, redisStorage.redisAuth,
+						config());
+			}
+		} catch (Exception e) {
+			logger.error("分布式环境下组件RedisStorage在Cluster模式下初始化链接失败。", e);
+			System.exit(1);
+		} 
 	}
 
 }

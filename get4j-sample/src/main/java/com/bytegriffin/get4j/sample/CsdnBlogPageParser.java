@@ -17,7 +17,7 @@ public class CsdnBlogPageParser implements PageParser {
 
     public static void main(String[] args) throws Exception {//blog_list clearfix
         Spider.list_detail().fetchUrl("https://blog.csdn.net/api/articles?type=more&category=home&shown_offset=ad1531325255862708")
-                .detailSelector("$.articles.url")
+                .detailLinkSelector("$.articles.url")
                 .parser(CsdnBlogPageParser.class).defaultUserAgent()
                 .probe("$.articles.id", 10)
                 //.jdbc("jdbc:mysql://localhost:3306/get4j?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&user=root&password=root")

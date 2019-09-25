@@ -10,7 +10,9 @@ import com.bytegriffin.get4j.util.Queue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import redis.clients.jedis.JedisCommands;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.ShardedJedis;
 
 public class RedisQueue<E> implements Queue<E> {
 
@@ -20,37 +22,44 @@ public class RedisQueue<E> implements Queue<E> {
 
 	private final Lock writeLock = readWriteLock.writeLock();
 
-	private  LinkedList<E> list = Lists.newLinkedList();
-	// key：redis_key  value：score count
+	private LinkedList<E> list = Lists.newLinkedList();
+	// key：redis_key value：score count
 	private final Map<String, Integer> score_map = Maps.newHashMap();
-
+	
 	@Override
 	public void add(E e) {
-        writeLock.lock();
-        try {
-            if (!contains(e)) {
-                list.add(e);
-            }
-        } finally {
-            writeLock.unlock();
-        }
-    }
+		writeLock.lock();
+		try {
+			if (!contains(e)) {
+				list.add(e);
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
 
 	@Override
 	public void add(String key, E e) {
 		writeLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
 			if (!contains(e)) {
 				int count = 0;
-				if(score_map.containsKey(key)){
+				if (score_map.containsKey(key)) {
 					count = score_map.get(key) + 1;
 				}
-				jedis.zadd(key, count, (String) e);
+				if(RedisStorage.jedisCluster != null) {
+					JedisCluster jedisCluster = RedisStorage.jedisCluster;
+					jedisCluster.zadd(key, count, (String) e);
+				} else if(RedisStorage.sharedJedis != null) {
+					ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+					sharedJedis.zadd(key, count, (String) e);
+				} else {
+					Jedis jedis = RedisStorage.jedis;
+					jedis.zadd(key, count, (String) e);
+				}
 				score_map.put(key, count);
 			}
 		} finally {
-			RedisStorage.close(jedis);
 			writeLock.unlock();
 		}
 	}
@@ -69,15 +78,23 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public E get(String queueName, int index) {
 		readLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-			Set<String> set =  jedis.zrange(queueName, 0, index);
-			if(set == null || set.isEmpty()){
+			Set<String> set = null;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				set = jedisCluster.zrange(queueName, 0, index);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				set = sharedJedis.zrange(queueName, 0, index);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				set = jedis.zrange(queueName, 0, index);
+			}
+			if (set == null || set.isEmpty()) {
 				return null;
 			}
 			return (E) set.iterator().next();
 		} finally {
-			RedisStorage.close(jedis);
 			readLock.unlock();
 		}
 	}
@@ -95,11 +112,20 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public long size(String queueName) {
 		readLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-			return jedis.zcard(queueName);
+			Long size = 0l;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				size = jedisCluster.zcard(queueName) == null? 0l : jedisCluster.zcard(queueName);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				size = sharedJedis.zcard(queueName) == null? 0l : sharedJedis.zcard(queueName);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				size = jedis.zcard(queueName) == null? 0l : jedis.zcard(queueName);
+			}
+			return size;
 		} finally {
-			RedisStorage.close(jedis);
 			readLock.unlock();
 		}
 	}
@@ -117,12 +143,19 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public void clear(String queueName) {
 		writeLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
 			list.clear();
-			jedis.zremrangeByRank(queueName, 0, -1);
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				jedisCluster.zremrangeByRank(queueName, 0, -1);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				sharedJedis.zremrangeByRank(queueName, 0, -1);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				jedis.zremrangeByRank(queueName, 0, -1);
+			}
 		} finally {
-			RedisStorage.close(jedis);
 			writeLock.unlock();
 		}
 	}
@@ -140,11 +173,20 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public boolean isEmpty(String queueName) {
 		writeLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
+		boolean isExist = false;
 		try {
-			return !jedis.exists(queueName);
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				isExist = !jedisCluster.exists(queueName);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				isExist = !sharedJedis.exists(queueName);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				isExist = !jedis.exists(queueName);
+			}
+			return isExist;
 		} finally {
-			RedisStorage.close(jedis);
 			writeLock.unlock();
 		}
 	}
@@ -166,19 +208,33 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public E outFirst(String queueName) {
 		writeLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-				Set<String> url = jedis.zrange(queueName, 0, 0);
-				long count = 0;
-				if(url != null && url.size() > 0){
+			long count = 0;
+			Set<String> url = null;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				url = jedisCluster.zrange(queueName, 0, 0);
+				if (url != null && url.size() > 0) {
+					count = jedisCluster.zremrangeByRank(queueName, 0, 0);
+				}
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				url = sharedJedis.zrange(queueName, 0, 0);
+				if (url != null && url.size() > 0) {
+					count = sharedJedis.zremrangeByRank(queueName, 0, 0);
+				}
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				url = jedis.zrange(queueName, 0, 0);
+				if (url != null && url.size() > 0) {
 					count = jedis.zremrangeByRank(queueName, 0, 0);
 				}
-				if(count == 1){
-					return (E) url.iterator().next();
-				}
-				return null;
+			}
+			if (count == 1) {
+				return (E) url.iterator().next();
+			}
+			return null;
 		} finally {
-			RedisStorage.close(jedis);
 			writeLock.unlock();
 		}
 	}
@@ -196,15 +252,23 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public boolean contains(String queueName, E e) {
 		readLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-			Long count = jedis.zrank(queueName, (String) e);
-			if(count != null && count > 0) {
+			Long count = 0l;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				count = jedisCluster.zrank(queueName, (String) e) == null ? 0l: jedisCluster.zrank(queueName, (String) e);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				count = sharedJedis.zrank(queueName, (String) e) == null ? 0l: sharedJedis.zrank(queueName, (String) e);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				count = jedis.zrank(queueName, (String) e) == null ? 0l: jedis.zrank(queueName, (String) e);
+			}
+			if (count > 0) {
 				return true;
 			}
 			return false;
 		} finally {
-			RedisStorage.close(jedis);
 			readLock.unlock();
 		}
 	}
@@ -213,17 +277,26 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public Queue<E> getQueue(String queueName) {
 		writeLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-			Set<String> set = jedis.zrange(queueName, 0, -1);
+			Set<String> set = null;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				set = jedisCluster.zrange(queueName, 0, -1);
+				
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				set = sharedJedis.zrange(queueName, 0, -1);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				set = jedis.zrange(queueName, 0, -1);
+			}
 			RedisQueue<E> queue = new RedisQueue<E>();
 			queue.list.clear();
-			for(String str : set){
+			for (String str : set) {
 				queue.list.add((E) str);
 			}
 			return queue;
 		} finally {
-			RedisStorage.close(jedis);
 			writeLock.unlock();
 		}
 	}
@@ -242,11 +315,20 @@ public class RedisQueue<E> implements Queue<E> {
 	@Override
 	public Set<E> getAll(String queueName) {
 		readLock.lock();
-		JedisCommands jedis = RedisStorage.newJedis();
 		try {
-			return  (Set<E>) jedis.zrange(queueName, 0, -1);
+			Set<E> set = null;
+			if(RedisStorage.jedisCluster != null) {
+				JedisCluster jedisCluster = RedisStorage.jedisCluster;
+				set = (Set<E>) jedisCluster.zrange(queueName, 0, -1);
+			} else if(RedisStorage.sharedJedis != null) {
+				ShardedJedis sharedJedis = RedisStorage.sharedJedis;
+				set = (Set<E>) sharedJedis.zrange(queueName, 0, -1);
+			} else {
+				Jedis jedis = RedisStorage.jedis;
+				set = (Set<E>) jedis.zrange(queueName, 0, -1);
+			}
+			return set;
 		} finally {
-			RedisStorage.close(jedis);
 			readLock.unlock();
 		}
 	}

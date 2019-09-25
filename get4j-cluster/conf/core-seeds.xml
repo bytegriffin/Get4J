@@ -32,7 +32,7 @@
             <value>default</value>
         </property>
         <property>
-            <name>fetch.detail.selector</name>
+            <name>fetch.detailLink.selector</name>
             <value></value>
         </property>
         <property>

@@ -15,8 +15,8 @@ public class IQiyiPageParser  implements PageParser {
     }
 
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://list.iqiyi.com/www/2/-------------11-{1}-1-iqiyi--.html").detailSelector("p.site-piclist_info_title > a[href]")
+        Spider.list_detail().fetchUrl("http://list.iqiyi.com/www/2/-------------24-{1}-1-iqiyi--.html")
+        		.detailLinkSelector("a.link-txt[href]")
                 .parser(IQiyiPageParser.class).thread(1).start();
     }
-
 }

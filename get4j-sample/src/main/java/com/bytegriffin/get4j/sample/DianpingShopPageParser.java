@@ -19,8 +19,8 @@ public class DianpingShopPageParser implements PageParser {
      * @throws Exception 异常
      */
     public static void main(String[] args) throws Exception {
-        Spider.list_detail().fetchUrl("http://www.dianping.com/search/category/2/10/p{1}").parser(DianpingShopPageParser.class)
-                .detailSelector("a[data-click-name=shop_title_click]").defaultUserAgent().thread(1).start();
+        Spider.list_detail().fetchUrl("http://www.dianping.com/beijing/ch10/p{1}").parser(DianpingShopPageParser.class)
+                .detailLinkSelector("a[data-click-name=shop_title_click]").defaultUserAgent().sleep(2).thread(1).start();
 
     }
 
