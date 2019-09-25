@@ -13,7 +13,7 @@ public class AmazonPageParser implements PageParser {
 	/**
      * 解析页面
      *
-     * @param Page 详情页对象/第一次返回的是列表页对象
+     * @param page 详情页对象/第一次返回的是列表页对象
      */
 	@Override
 	public void parse(Page page) {
