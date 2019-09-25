@@ -22,6 +22,9 @@ public class FreeProxyPageParser implements PageParser {
         List<HttpProxy> proxys = new ArrayList<>();
         if ("xicidaili".equals(seedName)) {
             Elements eles = page.jsoup("tr.odd");
+            if(eles== null || eles.isEmpty()) {
+            	return;
+            }
             for (Element e : eles) {
                 String ip = e.select("td:eq(1)").text();
                 String port = e.select("td:eq(2)").text();

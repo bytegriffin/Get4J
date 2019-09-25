@@ -40,6 +40,9 @@ public class FreeProxyStorage implements Process {
         // 1.验证抓取的代理
         HashSet<String> validates = new HashSet<>();
         HttpEngine http = Globals.HTTP_ENGINE_CACHE.get(page.getSeedName());
+        if (proxys == null || proxys.size() == 0) {
+            return;
+        }
         for (HttpProxy proxy : proxys) {
             boolean isReached = http.testHttpProxy(page.getUrl(), proxy);
             if (isReached) {
