@@ -63,7 +63,7 @@
 		<lucene.version>8.2.0</lucene.version>
 		<protostuff.version>1.6.0</protostuff.version>
 		<javaxmail.version>1.6.2</javaxmail.version>
-		<guava.version>28.1-jre</guava.version>
+		<guava.version>29.0-jre</guava.version>
 		<jedis.version>3.1.0</jedis.version>
 		<zookeeper.version>3.5.5</zookeeper.version>
 		<curator.version>4.2.0</curator.version>
