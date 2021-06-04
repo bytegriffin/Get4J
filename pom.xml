@@ -59,7 +59,7 @@
 		<mysql-connector.version>8.0.17</mysql-connector.version>
 		<mongo.version>3.11.0</mongo.version>
 		<commons-net.version>3.6</commons-net.version>
-		<snakeyaml.version>1.25</snakeyaml.version>
+		<snakeyaml.version>1.26</snakeyaml.version>
 		<lucene.version>8.2.0</lucene.version>
 		<protostuff.version>1.6.0</protostuff.version>
 		<javaxmail.version>1.6.2</javaxmail.version>
